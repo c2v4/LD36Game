@@ -45,7 +45,8 @@
                 <td>{{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
                 <td>{{(item.profession.efficiency * item.cardinality)|number:3}}
                     <button class="btn btn-primary" ng-click="vm.upgrade(item.profession)"
-                            ng-disabled="!vm.resources[tools]||item.profession.upgradeCost>vm.resources[tools]">Upgrade
+                            ng-disabled="!vm.resources['tools']||item.profession.upgradeCost > vm.resources['tools'].quantity">
+                        Upgrade
                         ({{item.profession.upgradeCost|number:1}} tools)
                     </button>
                 </td>
