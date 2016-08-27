@@ -11,11 +11,11 @@ class TribeController {
     static $inject: Array<string> = ['$interval'];
 
     constructor(public $interval: IIntervalService) {
-        $interval(this.tick, this.tickTime);
+        $interval(this.tick, 1000 / this.tickFrequency);
     }
 
     public controller: TribeController = this;
-    public tickTime = 1000;
+    public tickFrequency = 4;
     public resources: Resources = {
         science: 0,
         children: 0,
@@ -27,54 +27,134 @@ class TribeController {
             quantity: 120,
             act: ()=> {
                 this.environment["berries"].quantity +=
-                    8 / (Math.pow((this.environment["berries"].quantity - 120) / 10, 2) + 1);
+                    (8 / (Math.pow((this.environment["berries"].quantity - 120) / 10, 2) + 1)) / this.tickFrequency;
             }
         }
     };
-    public availableTechs: Array<Tech> = [{
-        name: 'hunting',
-        price: 2,
-        researched: ()=> {
-            this.population.push({
-                cardinality: 1,
-                profession: {
-                    name: 'hunter',
-                    foodConsumption: 0.3,
-                    efficiency: 0.5,
-                    act: (efficiency)=> {
-                        if (this.environment["animals"].quantity - efficiency > 0) {
-                            this.resources.food += efficiency;
-                            this.environment["animals"].quantity -= efficiency;
-                        } else {
-                            this.resources.food += this.environment["animals"].quantity;
-                            this.environment["animals"].quantity = 0;
+    public availableTechs: TechTree = {
+        "Hunting": {
+            name: 'Hunting',
+            price: 2,
+            researched: ()=> {
+                this.population.push({
+                    cardinality: 0,
+                    profession: {
+                        name: 'hunter',
+                        foodConsumption: 0.3,
+                        efficiency: 0.5,
+                        act: (efficiency)=> {
+                            if (this.environment["animals"].quantity - efficiency > 0) {
+                                this.resources.food += efficiency;
+                                this.environment["animals"].quantity -= efficiency;
+                            } else {
+                                this.resources.food += this.environment["animals"].quantity;
+                                this.environment["animals"].quantity = 0;
+                            }
                         }
                     }
-                }
-            });
-            this.environment["animals"] =
-            {
-                name: "animals",
-                quantity: 80,
-                act: ()=> {
-                    this.environment["animals"].quantity +=
-                        8 / (Math.pow((this.environment["animals"].quantity - 120) / 10, 2) + 1);
+                });
+                this.environment["animals"] =
+                {
+                    name: "animals",
+                    quantity: 80,
+                    act: ()=> {
+                        this.environment["animals"].quantity +=
+                            (8 / (Math.pow((this.environment["animals"].quantity - 120) / 10, 2) + 1)) / this.tickFrequency;
+                    }
+
                 }
 
-            }
+            },
+            unlocks: ['Animal Husbandry', 'Archery'],
+            prerequisites: []
+        },
+        "Crafting": {
+            name: 'Crafting',
+            price: 4,
+            researched: ()=> {
+
+            },
+            unlocks: ['Agriculture'],
+            prerequisites: []
+        },
+        "Settlement": {
+            name: 'Settlement',
+            price: 3,
+            researched: ()=> {
+
+            },
+            unlocks: ['Agriculture'],
+            prerequisites: []
+        },
+        "Alphabet": {
+            name: 'Alphabet',
+            price: 2,
+            researched: ()=> {
+
+            },
+            unlocks: ['Writing'],
+            prerequisites: []
+        },
+        "Fishing": {
+            name: 'Fishing',
+            price: 2,
+            researched: ()=> {
+                this.population.push({
+                    cardinality: 0,
+                    profession: {
+                        name: 'fisher',
+                        foodConsumption: 0.3,
+                        efficiency: 0.5,
+                        act: (efficiency)=> {
+                            if (this.environment["fish"].quantity - efficiency > 0) {
+                                this.resources.food += efficiency;
+                                this.environment["fish"].quantity -= efficiency;
+                            } else {
+                                this.resources.food += this.environment["fish"].quantity;
+                                this.environment["fish"].quantity = 0;
+                            }
+                        }
+                    }
+                });
+                this.environment["fish"] =
+                {
+                    name: "fish",
+                    quantity: 80,
+                    act: ()=> {
+                        this.environment["fish"].quantity +=
+                            (8 / (Math.pow((this.environment["fish"].quantity - 120) / 10, 2) + 1)) / this.tickFrequency;
+                    }
+
+                }
+
+            },
+            unlocks: ['Sailing'],
+            prerequisites: []
         }
-    }];
+    };
+
+    public allTechs: TechTree = {
+        "Agriculture": {
+            name: 'Agriculture',
+            price: 10,
+            researched: ()=> {
+
+            },
+            unlocks: ['Animal Husbandry', 'Archery', 'Mining', 'Pottery'],
+            prerequisites: ['Crafting', 'Settlement']
+        }
+    };
 
     public population: Array<PopulationEntry> = [
         {
-            cardinality: 1,
+            cardinality: 2,
             profession: {
                 name: 'idle',
                 foodConsumption: 0.1,
                 efficiency: 0.01,
                 act: (efficiency: number, controller: TribeController)=> {
                     controller.resources.children += efficiency;
-                    var toAdd = Math.ceil(controller.resources.children);
+                    var toAdd = Math.floor(controller.resources.children);
                     if (toAdd > 0) {
                         controller.resources.children -= toAdd;
                         _(controller.population).filter((item: PopulationEntry)=> {
@@ -132,14 +212,14 @@ class TribeController {
     };
     public feed: Function = ()=> {
         this.resources.food -= _(this.population).map((item: PopulationEntry)=> {
-            return item.cardinality * item.profession.foodConsumption;
+            return item.cardinality * item.profession.foodConsumption / this.tickFrequency;
         }).sum();
     };
 
 
     private work() {
         this.population.forEach((entry: PopulationEntry)=> {
-            entry.profession.act(entry.profession.efficiency * entry.cardinality, this.controller);
+            entry.profession.act(entry.profession.efficiency / this.tickFrequency * entry.cardinality, this.controller);
         })
     }
 
@@ -163,7 +243,7 @@ class TribeController {
 
     private starve() {
         let totalFoodConsumption = _(this.population).map((item: PopulationEntry)=> {
-            return item.cardinality * item.profession.foodConsumption;
+            return item.cardinality * item.profession.foodConsumption / this.tickFrequency;
         }).sum();
         while (totalFoodConsumption > this.resources.food) {
             let numOfIdlers = this.population[0].cardinality;
@@ -178,11 +258,17 @@ class TribeController {
 
     public research(tech: Tech) {
         this.resources.science -= tech.price;
+        delete this.availableTechs[tech.name];
+        this.allTechs[tech.name] || delete this.allTechs[tech.name];
+        _(tech.unlocks).forEach((newTech: string)=> {
+            if (this.allTechs[newTech] && !_(this.allTechs[newTech].prerequisites).some((prerequisite: string)=> {
+                    return this.allTechs[prerequisite] || this.availableTechs[prerequisite];
+                })) {
+                this.availableTechs[newTech] = this.allTechs[newTech];
+                delete this.allTechs[newTech];
+            }
+        });
         tech.researched();
-        let i = this.availableTechs.indexOf(tech);
-        if (i != -1) {
-            this.availableTechs.splice(i, 1);
-        }
     }
 
     private updateEnvironment() {
@@ -213,6 +299,11 @@ interface Tech {
     name: string
     price: number
     researched: Function
+    unlocks: Array<string>
+    prerequisites: Array<string>
+}
+interface TechTree {
+    [key: string]: Tech;
 }
 
 interface Environment {

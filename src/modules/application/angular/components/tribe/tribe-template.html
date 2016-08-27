@@ -2,8 +2,20 @@
     TRIBE
 </h1>
 <div id="resources">
-    <span>Food: {{vm.resources.food|number:1}}</span>
-    <span>Science: {{vm.resources.science|number:1}}</span>
+    <table class="table table-condensed table-bordered">
+        <tr>
+            <td>Food:</td>
+            <td>{{vm.resources.food|number:1}}</td>
+        </tr>
+        <tr>
+            <td>Science:</td>
+            <td>{{vm.resources.science|number:1}}</td>
+        </tr>
+        <tr>
+            <td>Fertility:</td>
+            <td>{{vm.resources.children|number:2}}</td>
+        </tr>
+    </table>
 </div>
 <div class="row">
     <div class="col-md-4" id="population">
