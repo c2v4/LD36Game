@@ -1,7 +1,7 @@
 <h1>
     TRIBE
 </h1>
-<span>Food: {{vm.resources.food}}</span>
+<span>Food: {{vm.resources.food|number:1}}</span>
 <div class="row">
     <div class="col-md-4">
         <h3>Population: </h3>
@@ -9,7 +9,17 @@
             <tr ng-repeat="item in vm.population">
                 <td>Profession: {{item.profession.name}}</td>
                 <td>Number: {{item.cardinality}}</td>
-                <td>Total Food Consumption: {{item.cardinality * item.profession.foodConsumption}}</td>
+                <td>Total Food Consumption: {{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
+                <td>
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-primary" ng-click="vm.addWorker(item)"
+                                ng-show="vm.availableWorkers() && item.profession.name!='idle'">+
+                        </button>
+                        <button class="btn btn-primary" ng-click="vm.removeWorker(item)"
+                                ng-show="item.cardinality>0 && item.profession.name!='idle'">-
+                        </button>
+                    </div>
+                </td>
             </tr>
         </table>
     </div>
