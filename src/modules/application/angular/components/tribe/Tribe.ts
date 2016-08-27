@@ -20,7 +20,7 @@ class TribeController {
     public resources: Resources = {
         science: {
             name: "science",
-            quantity: 50,
+            quantity: 0,
             balance: ()=> {
                 return this.population['scientist'].cardinality * this.population['idle'].profession.efficiency;
             }
@@ -85,8 +85,7 @@ class TribeController {
                     name: "animals",
                     quantity: 80,
                     renewal: ()=> {
-                        return this.environment["animals"].quantity +=
-                            (8 / (Math.pow((this.environment["animals"].quantity - 120) / 10, 2) + 1));
+                        return (8 / (Math.pow((this.environment["animals"].quantity - 120) / 10, 2) + 1));
                     },
                     balance: ()=> {
                         return this.environment["animals"].renewal() - this.population['hunter'].cardinality * this.population['hunter'].profession.efficiency;
