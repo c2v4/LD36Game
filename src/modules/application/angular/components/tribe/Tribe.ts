@@ -22,15 +22,48 @@ class TribeController {
         food: 10
     };
     public environment: Environment = {
-        "animals": {
-            quantity: 2,
+        "berries": {
+            name: "berries",
+            quantity: 120,
             act: ()=> {
-                this.environment["animals"].quantity +=
-                    10 / (Math.pow(this.environment["animals"].quantity / 205 - 7.5 / 2.05, 2) + 1);
+                this.environment["berries"].quantity +=
+                    8 / (Math.pow((this.environment["berries"].quantity - 120) / 10, 2) + 1);
             }
         }
     };
-    public availableTechs: Array<Tech> = [];
+    public availableTechs: Array<Tech> = [{
+        name: 'hunting',
+        price: 2,
+        researched: ()=> {
+            this.population.push({
+                cardinality: 1,
+                profession: {
+                    name: 'hunter',
+                    foodConsumption: 0.3,
+                    efficiency: 0.5,
+                    act: (efficiency)=> {
+                        if (this.environment["animals"].quantity - efficiency > 0) {
+                            this.resources.food += efficiency;
+                            this.environment["animals"].quantity -= efficiency;
+                        } else {
+                            this.resources.food += this.environment["animals"].quantity;
+                            this.environment["animals"].quantity = 0;
+                        }
+                    }
+                }
+            });
+            this.environment["animals"] =
+            {
+                name: "animals",
+                quantity: 80,
+                act: ()=> {
+                    this.environment["animals"].quantity +=
+                        8 / (Math.pow((this.environment["animals"].quantity - 120) / 10, 2) + 1);
+                }
+
+            }
+        }
+    }];
 
     public population: Array<PopulationEntry> = [
         {
@@ -67,16 +100,16 @@ class TribeController {
         {
             cardinality: 1,
             profession: {
-                name: 'hunter',
-                foodConsumption: 0.3,
-                efficiency: 0.5,
+                name: 'gatherer',
+                foodConsumption: 0.2,
+                efficiency: 0.3,
                 act: (efficiency)=> {
-                    if (this.environment["animals"].quantity - efficiency > 0) {
+                    if (this.environment["berries"].quantity - efficiency > 0) {
                         this.resources.food += efficiency;
-                        this.environment["animals"].quantity -= efficiency;
+                        this.environment["berries"].quantity -= efficiency;
                     } else {
-                        this.resources.food += this.environment["animals"].quantity;
-                        this.environment["animals"].quantity = 0;
+                        this.resources.food += this.environment["berries"].quantity;
+                        this.environment["berries"].quantity = 0;
                     }
                 }
             }
@@ -186,6 +219,7 @@ interface Environment {
     [key: string]: EnvironmentItem;
 }
 interface EnvironmentItem {
+    name: string
     quantity: number
     act: Function
 }

@@ -6,7 +6,7 @@
     <span>Science: {{vm.resources.science|number:1}}</span>
 </div>
 <div class="row">
-    <div class="col-md-6" id="population">
+    <div class="col-md-4" id="population">
         <h3>Population: </h3>
         <table class="table table-condensed table-bordered">
             <tr ng-repeat="item in vm.population">
@@ -27,9 +27,9 @@
             </tr>
         </table>
     </div>
-    <div class="col-md-6">
+    <div class="col-md-4">
         <h3>Technology:</h3>
-        <table>
+        <table class="table table-condensed table-bordered">
             <tr ng-repeat="item in vm.availableTechs">
                 <td>Name: {{item.name}}</td>
                 <td>Price: {{item.price}}</td>
@@ -41,7 +41,13 @@
             </tr>
         </table>
     </div>
-</div>
-<div id="environment">
-    <span>Animals: {{vm.environment['animals'].quantity}}</span>
+    <div id="environment" class="col-md-4">
+        <h3>Environment:</h3>
+        <table class="table table-condensed table-bordered">
+            <tr ng-repeat="item in vm.environment">
+                <td>Name: {{item.name}}</td>
+                <td>Quantity: {{item.quantity | number:0}}</td>
+            </tr>
+        </table>
+    </div>
 </div>
