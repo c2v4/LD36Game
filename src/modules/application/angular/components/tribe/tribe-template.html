@@ -3,19 +3,20 @@
 </h1>
 <div id="resources">
     <table class="table table-condensed table-bordered">
-        <tr>
+        <tr ng-class="vm.resources['children'].balance()>0?'success':'info'">
             <td>{{vm.resources['children'].name}}:</td>
             <td>
                 <div class="progress-bar  progress-bar-striped " role="progressbar"
                      aria-valuenow="{{vm.resources['children'].quantity}}"
                      aria-valuemin="0" aria-valuemax="1" style="width:{{vm.resources['children'].quantity*100}}%"
-                     ng-class="vm.resources['children'].balance() > 0 ? 'progress-bar-success active' : '' ">
-                    {{vm.resources['children'].quantity|number:2}} ({{vm.resources['children'].balance()|number:2}})
+                     ng-class="vm.resources['children'].balance() > 0 ? 'progress-bar-success active ' : '' ">
+                    {{vm.resources['children'].quantity|number:2}}% ({{vm.resources['children'].balance()|number:2}})
                 </div>
 
             </td>
         </tr>
-        <tr ng-repeat="resource in vm.resources" ng-if="resource.name != 'children'">
+        <tr ng-repeat="resource in vm.resources" ng-if="resource.name != 'children'"
+            ng-class="resource.balance()>0?'success':resource.balance()==0?'info':'danger'">
             <td>
                 {{resource.name}}:
             </td>
@@ -28,10 +29,9 @@
 <div class="row">
     <div class="col-md-4" id="population">
         <h3>Population: {{vm.getTotalPopulation()}}</h3>
-        <table class="table table-condensed table-bordered">
+        <table class="table table-condensed table-bordered table-hover">
             <tr ng-repeat="item in vm.population">
-                <td>Profession: {{item.profession.name}}</td>
-                <td>Number: {{item.cardinality}}</td>
+                <td>{{item.profession.name}} <span class="badge">{{item.cardinality}}</span></td>
                 <td>Food Consumption: {{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
                 <td>Efficiency: {{(item.profession.efficiency * item.cardinality)|number:2}}</td>
                 <td>
@@ -49,7 +49,7 @@
     </div>
     <div class="col-md-4">
         <h3>Technology:</h3>
-        <table class="table table-condensed table-bordered">
+        <table class="table table-condensed table-bordered table-hover">
             <tr ng-repeat="item in vm.availableTechs">
                 <td>Name: {{item.name}}</td>
                 <td>Price: {{item.price}}</td>
@@ -63,7 +63,7 @@
     </div>
     <div id="environment" class="col-md-4">
         <h3>Environment:</h3>
-        <table class="table table-condensed table-bordered">
+        <table class="table table-condensed table-bordered table-hover">
             <tr ng-repeat="item in vm.environment">
                 <td>Name: {{item.name}}</td>
                 <td>Quantity: {{item.quantity | number:0}}</td>
