@@ -3,8 +3,23 @@
 </h1>
 <div id="resources">
     <table class="table table-condensed table-bordered">
-        <tr ng-repeat="resource in vm.resources">
-            <td>{{resource.name}}: {{resource.quantity|number:2}} (<span
+        <tr>
+            <td>{{vm.resources['children'].name}}:</td>
+            <td>
+                <div class="progress-bar  progress-bar-striped " role="progressbar"
+                     aria-valuenow="{{vm.resources['children'].quantity}}"
+                     aria-valuemin="0" aria-valuemax="1" style="width:{{vm.resources['children'].quantity*100}}%"
+                     ng-class="vm.resources['children'].balance() > 0 ? 'progress-bar-success active' : '' ">
+                    {{vm.resources['children'].quantity|number:2}} ({{vm.resources['children'].balance()|number:2}})
+                </div>
+
+            </td>
+        </tr>
+        <tr ng-repeat="resource in vm.resources" ng-if="resource.name != 'children'">
+            <td>
+                {{resource.name}}:
+            </td>
+            <td>{{resource.quantity|number:2}} (<span
                     ng-style="{ color: resource.balance() > 0 ? 'green' : 'red' }">{{resource.balance()|number:2}}</span>)
             </td>
         </tr>

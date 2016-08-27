@@ -48,7 +48,7 @@ class TribeController {
             quantity: 120,
             act: ()=> {
                 this.environment["berries"].quantity +=
-                    (8 / (Math.pow((this.environment["berries"].quantity - 120) / 10, 2) + 1)) / this.tickFrequency;
+                    (3 / (Math.pow((this.environment["berries"].quantity - 120) / 10, 2) + 1)) / this.tickFrequency;
             }
         }
     };
@@ -174,7 +174,7 @@ class TribeController {
     };
     public population: Population = {
         idle: {
-            cardinality: 2,
+            cardinality: 1,
             profession: {
                 name: 'idle',
                 foodConsumption: 0.1,
@@ -206,7 +206,7 @@ class TribeController {
             }
         },
         gatherer: {
-            cardinality: 1,
+            cardinality: 2,
             profession: {
                 name: 'gatherer',
                 foodConsumption: 0.2,
@@ -284,9 +284,9 @@ class TribeController {
     }
 
     public tick: Function = ()=> {
+        this.starve();
         this.feed();
         this.work();
-        this.starve();
         this.updateEnvironment();
     };
     public feed: Function = ()=> {
