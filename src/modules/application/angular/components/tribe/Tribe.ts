@@ -106,7 +106,7 @@ class TribeController {
             researched: ()=> {
                 this.resources['tools'] = {
                     name: 'tools',
-                    quantity: 50,
+                    quantity: 0,
                     balance: ()=> {
                         if (this.population['crafter']) {
                             return this.population['crafter'].cardinality * this.population['crafter'].profession.efficiency;
