@@ -19,7 +19,7 @@ class TribeController {
     public resources: Resources = {
         science: 0,
         children: 0,
-        food: 100
+        food: 30
     };
     // public availableProfessions: Dictionary<Profession> = new Dictionary<Profession>([
     //     {key: "idle", value: {name:'idle',foodConsumption: 0.1}},
@@ -50,7 +50,7 @@ class TribeController {
             cardinality: 0,
             profession: {
                 name: 'scientist',
-                foodConsumption: 0.2,
+                foodConsumption: 0.4,
                 efficiency: 0.01,
                 act: (efficiency: number, controller: TribeController)=> {
                     controller.resources.science += efficiency;
@@ -82,6 +82,7 @@ class TribeController {
     public tick: Function = ()=> {
         this.feed();
         this.work();
+        this.starve();
     };
     public feed: Function = ()=> {
         this.resources.food -= _(this.population).map((item: PopulationEntry)=> {
@@ -112,6 +113,21 @@ class TribeController {
             item.cardinality++
         });
         worker.cardinality--;
+    }
+
+    private starve() {
+        let totalFoodConsumption = _(this.population).map((item: PopulationEntry)=> {
+            return item.cardinality * item.profession.foodConsumption;
+        }).sum();
+        while (totalFoodConsumption > this.resources.food) {
+            let numOfIdlers = this.population[0].cardinality;
+            let index: number = Math.floor(Math.random() * this.population.length);
+            let populationEntry: PopulationEntry = numOfIdlers > 0 ? this.population[0] : this.population[index];
+            if (populationEntry.cardinality > 0) {
+                totalFoodConsumption -= populationEntry.profession.foodConsumption;
+                populationEntry.cardinality--;
+            }
+        }
     }
 }
 interface Resources {
