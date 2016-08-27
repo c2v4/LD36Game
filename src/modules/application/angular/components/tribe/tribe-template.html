@@ -1,4 +1,16 @@
 <h1>
     TRIBE
 </h1>
-<span>Population: {{vm.population}}</span>
+<span>Food: {{vm.resources.food}}</span>
+<div class="row">
+    <div class="col-md-4">
+        <h3>Population: </h3>
+        <table class="table table-condensed table-bordered">
+            <tr ng-repeat="item in vm.population">
+                <td>Profession: {{item.profession.name}}</td>
+                <td>Number: {{item.cardinality}}</td>
+                <td>Total Food Consumption: {{item.cardinality * item.profession.foodConsumption}}</td>
+            </tr>
+        </table>
+    </div>
+</div>
