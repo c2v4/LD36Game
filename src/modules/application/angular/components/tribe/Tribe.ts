@@ -19,12 +19,27 @@ class TribeController {
     public resources: Resources = {
         science: 0,
         children: 0,
-        food: 30
+        food: 100
     };
-    // public availableProfessions: Dictionary<Profession> = new Dictionary<Profession>([
-    //     {key: "idle", value: {name:'idle',foodConsumption: 0.1}},
-    //     // {key: "hunter", value: {foodConsumption: 0.3}}
-    // ]);
+    public availableTechs: Array<Tech> = [{
+        name: 'hunting',
+        price: 1,
+        researched: ()=> {
+            this.population.push({
+                cardinality: 0,
+                profession: {
+                    name: 'hunter',
+                    foodConsumption: 0.3,
+                    efficiency: 0.5,
+                    act: (efficiency)=> {
+                        this.resources.food += efficiency;
+
+                    }
+                }
+            });
+        }
+    }];
+
     public population: Array<PopulationEntry> = [
         {
             cardinality: 16,
@@ -56,19 +71,7 @@ class TribeController {
                     controller.resources.science += efficiency;
                 }
             }
-        },
-        {
-            cardinality: 0,
-            profession: {
-                name: 'hunter',
-                foodConsumption: 0.3,
-                efficiency: 0.5,
-                act: (efficiency)=> {
-                    this.resources.food += efficiency;
-
-                }
-            }
-        },
+        }
     ];
 
     public availableWorkers(): boolean {
@@ -129,22 +132,36 @@ class TribeController {
             }
         }
     }
+
+    public research(tech: Tech) {
+        this.resources.science -= tech.price;
+        tech.researched();
+        let i = this.availableTechs.indexOf(tech);
+        if (i != -1) {
+            this.availableTechs.splice(i, 1);
+        }
+    }
 }
 interface Resources {
-    food: number,
+    food: number
     children: number
     science: number
 }
-// interface Population {
-//     idle: number;
-// }
+
 interface Profession {
-    name: string,
-    foodConsumption: number,
-    efficiency: number,
+    name: string
+    foodConsumption: number
+    efficiency: number
     act: Function
 }
+
 interface PopulationEntry {
-    cardinality: number,
+    cardinality: number
     profession: Profession
+}
+
+interface Tech {
+    name: string
+    price: number
+    researched: Function
 }
