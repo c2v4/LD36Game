@@ -14,8 +14,10 @@ class TribeController {
         $interval(this.tick, this.tickTime);
     }
 
+    public controller: TribeController = this;
     public tickTime = 1000;
     public resources: Resources = {
+        children: 0,
         food: 100
     };
     // public availableProfessions: Dictionary<Profession> = new Dictionary<Profession>([
@@ -26,7 +28,21 @@ class TribeController {
         {
             cardinality: 16,
             profession: {
-                name: 'idle', foodConsumption: 0.1, efficiency: 0, act: (efficiency)=> {
+                name: 'idle',
+                foodConsumption: 0.1,
+                efficiency: 0.01,
+                act: (efficiency: number, controller: TribeController)=> {
+                    controller.resources.children += efficiency;
+                    var toAdd = Math.ceil(controller.resources.children);
+                    if (toAdd > 0) {
+                        controller.resources.children -= toAdd;
+                        _(controller.population).filter((item: PopulationEntry)=> {
+                            return item.profession.name == "idle";
+                        }).forEach((item: PopulationEntry)=> {
+                            item.cardinality += toAdd;
+                        });
+                    }
+
                 }
             }
         },
@@ -62,9 +78,10 @@ class TribeController {
         }).sum();
     };
 
+
     private work() {
         this.population.forEach((entry: PopulationEntry)=> {
-            entry.profession.act(entry.profession.efficiency * entry.cardinality);
+            entry.profession.act(entry.profession.efficiency * entry.cardinality, this.controller);
         })
     }
 
@@ -87,7 +104,8 @@ class TribeController {
     }
 }
 interface Resources {
-    food: number
+    food: number,
+    children: number
 }
 // interface Population {
 //     idle: number;
