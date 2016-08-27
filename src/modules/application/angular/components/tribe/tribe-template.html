@@ -10,7 +10,8 @@
                      aria-valuenow="{{vm.resources['children'].quantity}}"
                      aria-valuemin="0" aria-valuemax="1" style="width:{{vm.resources['children'].quantity*100}}%"
                      ng-class="vm.resources['children'].balance() > 0 ? 'progress-bar-success active ' : '' ">
-                    {{vm.resources['children'].quantity|number:2}}% ({{vm.resources['children'].balance()|number:2}})
+                    {{vm.resources['children'].quantity*100|number:0}}%
+                    ({{vm.resources['children'].balance()|number:2}})
                 </div>
 
             </td>
@@ -21,7 +22,7 @@
                 {{resource.name}}:
             </td>
             <td>{{resource.quantity|number:2}} (<span
-                    ng-style="{ color: resource.balance() > 0 ? 'green' : 'red' }">{{resource.balance()|number:2}}</span>)
+                    ng-style="{ color: resource.balance() > 0 ? 'green' :resource.balance()==0?'black': 'red' }">{{resource.balance()|number:2}}</span>)
             </td>
         </tr>
     </table>
@@ -30,17 +31,31 @@
     <div class="col-md-4" id="population">
         <h3>Population: {{vm.getTotalPopulation()}}</h3>
         <table class="table table-condensed table-bordered table-hover">
+            <thead>
+            <tr>
+                <td>Job</td>
+                <td>Quantity</td>
+                <td>Food Consumption</td>
+                <td>Efficiency</td>
+            </tr>
+            </thead>
             <tr ng-repeat="item in vm.population">
-                <td>{{item.profession.name}} <span class="badge">{{item.cardinality}}</span></td>
-                <td>Food Consumption: {{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
-                <td>Efficiency: {{(item.profession.efficiency * item.cardinality)|number:2}}</td>
+                <td>{{item.profession.name}}</td>
+                <td><span class="label label-pill label-info" style="align:center">{{item.cardinality}}</span></td>
+                <td>{{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
+                <td>{{(item.profession.efficiency * item.cardinality)|number:3}}
+                    <button class="btn btn-primary" ng-click="vm.upgrade(item.profession)"
+                            ng-disabled="!vm.resources[tools]||item.profession.upgradeCost>vm.resources[tools]">Upgrade
+                        ({{item.profession.upgradeCost|number:1}} tools)
+                    </button>
+                </td>
                 <td>
                     <div class="btn-group" role="group">
                         <button class="btn btn-primary" ng-click="vm.addWorker(item)"
-                                ng-show="vm.availableWorkers() && item.profession.name!='idle'">+
+                                ng-disabled="!(vm.availableWorkers() && item.profession.name!='idle')">+
                         </button>
                         <button class="btn btn-primary" ng-click="vm.removeWorker(item)"
-                                ng-show="item.cardinality>0 && item.profession.name!='idle'">-
+                                ng-disabled="!(item.cardinality>0 && item.profession.name!='idle')">-
                         </button>
                     </div>
                 </td>
@@ -55,7 +70,7 @@
                 <td>Price: {{item.price}}</td>
                 <td>
                     <button class="btn btn-primary" ng-click="vm.research(item)"
-                            ng-show="item.price<=vm.resources['science'].quantity">Research
+                            ng-disabled="item.price>vm.resources['science'].quantity">Research
                     </button>
                 </td>
             </tr>

@@ -63,6 +63,7 @@ class TribeController {
                         name: 'hunter',
                         foodConsumption: 0.3,
                         efficiency: 0.5,
+                        upgradeCost: 1,
                         act: (efficiency)=> {
                             if (this.environment["animals"].quantity - efficiency > 0) {
                                 this.resources["food"].quantity += efficiency;
@@ -108,6 +109,7 @@ class TribeController {
                         name: 'crafter',
                         foodConsumption: 0.5,
                         efficiency: 0.01,
+                        upgradeCost: 8,
                         act: (efficiency)=> {
                             this.resources['tools'].quantity += efficiency;
                         }
@@ -145,6 +147,7 @@ class TribeController {
                         name: 'fisher',
                         foodConsumption: 0.3,
                         efficiency: 0.5,
+                        upgradeCost: 1,
                         act: (efficiency)=> {
                             if (this.environment["fish"].quantity - efficiency > 0) {
                                 this.resources["food"].quantity += efficiency;
@@ -179,6 +182,7 @@ class TribeController {
                 name: 'idle',
                 foodConsumption: 0.1,
                 efficiency: 0.01,
+                upgradeCost: 3,
                 act: (efficiency: number, controller: TribeController)=> {
                     controller.resources["children"].quantity += efficiency;
                     var toAdd = Math.floor(controller.resources["children"].quantity);
@@ -200,6 +204,7 @@ class TribeController {
                 name: 'scientist',
                 foodConsumption: 0.4,
                 efficiency: 0.01,
+                upgradeCost: 6,
                 act: (efficiency: number, controller: TribeController)=> {
                     controller.resources["science"].quantity += efficiency;
                 }
@@ -211,6 +216,7 @@ class TribeController {
                 name: 'gatherer',
                 foodConsumption: 0.2,
                 efficiency: 0.3,
+                upgradeCost: 1,
                 act: (efficiency)=> {
                     if (this.environment["berries"].quantity - efficiency > 0) {
                         this.resources["food"].quantity += efficiency;
@@ -235,6 +241,7 @@ class TribeController {
                         name: 'farmer',
                         foodConsumption: 0.2,
                         efficiency: 0.4,
+                        upgradeCost: 5,
                         act: (efficiency)=> {
                             this.resources["food"].quantity += efficiency;
                         }
@@ -263,6 +270,7 @@ class TribeController {
                         name: 'farmer',
                         foodConsumption: 0.6,
                         efficiency: 0.2,
+                        upgradeCost: 5,
                         act: (efficiency)=> {
                             this.resources["ore"].quantity += efficiency;
                         }
@@ -359,6 +367,11 @@ class TribeController {
             value.act();
         });
     }
+
+    public upgrade(profession: Profession) {
+        profession.efficiency *= 1.2;
+        profession.upgradeCost *= 1.6;
+    }
 }
 interface Resources {
     [key: string]: Resource;
@@ -374,6 +387,7 @@ interface Profession {
     foodConsumption: number
     efficiency: number
     act: Function
+    upgradeCost: number
 }
 interface Population {
     [key: string]: PopulationEntry;
