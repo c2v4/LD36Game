@@ -93,7 +93,26 @@ class TribeController {
             name: 'Crafting',
             price: 4,
             researched: ()=> {
-
+                this.resources['tools'] = {
+                    name: 'tools',
+                    quantity: 0,
+                    balance: ()=> {
+                        if (this.population['tools']) {
+                            return this.population['crafter'].cardinality * this.population['crafter'].profession.efficiency;
+                        }
+                    }
+                };
+                this.population["crafter"] = {
+                    cardinality: 0,
+                    profession: {
+                        name: 'crafter',
+                        foodConsumption: 0.5,
+                        efficiency: 0.01,
+                        act: (efficiency)=> {
+                            this.resources['tools'].quantity += efficiency;
+                        }
+                    }
+                };
             },
             unlocks: ['Agriculture'],
             prerequisites: []
@@ -260,9 +279,9 @@ class TribeController {
     private starve() {
         let totalFoodConsumption = this.getTotalFoodConsumed();
         while (totalFoodConsumption > this.resources["food"].quantity) {
-            let numOfIdlers = this.population[0].cardinality;
+            let numOfIdlers = this.population['idle'].cardinality;
             let index: number = Math.floor(Math.random() * _.keys(this.population).length);
-            let populationEntry: PopulationEntry = numOfIdlers > 0 ? this.population[0] : this.population[index];
+            let populationEntry: PopulationEntry = numOfIdlers > 0 ? this.population['idle'] : this.population[index];
             if (populationEntry.cardinality > 0) {
                 totalFoodConsumption -= populationEntry.profession.foodConsumption;
                 populationEntry.cardinality--;

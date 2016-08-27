@@ -40,7 +40,7 @@
                 <td>Price: {{item.price}}</td>
                 <td>
                     <button class="btn btn-primary" ng-click="vm.research(item)"
-                            ng-show="item.price<=vm.resources.science">Research
+                            ng-show="item.price<=vm.resources['science'].quantity">Research
                     </button>
                 </td>
             </tr>
