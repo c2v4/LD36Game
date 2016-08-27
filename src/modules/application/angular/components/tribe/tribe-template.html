@@ -3,29 +3,22 @@
 </h1>
 <div id="resources">
     <table class="table table-condensed table-bordered">
-        <tr>
-            <td>Food:</td>
-            <td>{{vm.resources.food|number:1}}</td>
-        </tr>
-        <tr>
-            <td>Science:</td>
-            <td>{{vm.resources.science|number:1}}</td>
-        </tr>
-        <tr>
-            <td>Fertility:</td>
-            <td>{{vm.resources.children|number:2}}</td>
+        <tr ng-repeat="resource in vm.resources">
+            <td>{{resource.name}}: {{resource.quantity|number:2}} (<span
+                    ng-style="{ color: resource.balance() > 0 ? 'green' : 'red' }">{{resource.balance()|number:2}}</span>)
+            </td>
         </tr>
     </table>
 </div>
 <div class="row">
     <div class="col-md-4" id="population">
-        <h3>Population: </h3>
+        <h3>Population: {{vm.getTotalPopulation()}}</h3>
         <table class="table table-condensed table-bordered">
             <tr ng-repeat="item in vm.population">
                 <td>Profession: {{item.profession.name}}</td>
                 <td>Number: {{item.cardinality}}</td>
-                <td>Total Food Consumption: {{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
-                <td>Total Efficiency: {{(item.profession.efficiency * item.cardinality)|number:2}}</td>
+                <td>Food Consumption: {{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
+                <td>Efficiency: {{(item.profession.efficiency * item.cardinality)|number:2}}</td>
                 <td>
                     <div class="btn-group" role="group">
                         <button class="btn btn-primary" ng-click="vm.addWorker(item)"
