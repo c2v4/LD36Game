@@ -17,6 +17,7 @@ class TribeController {
     public controller: TribeController = this;
     public tickTime = 1000;
     public resources: Resources = {
+        science: 0,
         children: 0,
         food: 100
     };
@@ -43,6 +44,16 @@ class TribeController {
                         });
                     }
 
+                }
+            }
+        }, {
+            cardinality: 0,
+            profession: {
+                name: 'scientist',
+                foodConsumption: 0.2,
+                efficiency: 0.01,
+                act: (efficiency: number, controller: TribeController)=> {
+                    controller.resources.science += efficiency;
                 }
             }
         },
@@ -106,6 +117,7 @@ class TribeController {
 interface Resources {
     food: number,
     children: number
+    science: number
 }
 // interface Population {
 //     idle: number;
