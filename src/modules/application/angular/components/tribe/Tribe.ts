@@ -20,7 +20,7 @@ class TribeController {
     public resources: Resources = {
         science: {
             name: "science",
-            quantity: 0,
+            quantity: 50,
             balance: ()=> {
                 return this.population['scientist'].cardinality * this.population['idle'].profession.efficiency;
             }
@@ -36,7 +36,7 @@ class TribeController {
             name: "food",
             quantity: 10,
             balance: ()=> {
-                return _(['hunter', 'gatherer', 'fisher']).map((worker)=> {
+                return _(['hunter', 'gatherer', 'fisher', 'farmer']).map((worker)=> {
                         return this.population[worker] ? (this.population[worker].cardinality * this.population[worker].profession.efficiency) : 0;
                     }).sum() - this.getTotalFoodConsumed()
             }
@@ -97,7 +97,7 @@ class TribeController {
                     name: 'tools',
                     quantity: 0,
                     balance: ()=> {
-                        if (this.population['tools']) {
+                        if (this.population['crafter']) {
                             return this.population['crafter'].cardinality * this.population['crafter'].profession.efficiency;
                         }
                     }
@@ -172,19 +172,6 @@ class TribeController {
             prerequisites: []
         }
     };
-
-    public allTechs: TechTree = {
-        "Agriculture": {
-            name: 'Agriculture',
-            price: 10,
-            researched: ()=> {
-
-            },
-            unlocks: ['Animal Husbandry', 'Archery', 'Mining', 'Pottery'],
-            prerequisites: ['Crafting', 'Settlement']
-        }
-    };
-
     public population: Population = {
         idle: {
             cardinality: 2,
@@ -237,6 +224,57 @@ class TribeController {
         }
     };
 
+    public allTechs: TechTree = {
+        "Agriculture": {
+            name: 'Agriculture',
+            price: 10,
+            researched: ()=> {
+                this.population["farmer"] = {
+                    cardinality: 0,
+                    profession: {
+                        name: 'farmer',
+                        foodConsumption: 0.2,
+                        efficiency: 0.4,
+                        act: (efficiency)=> {
+                            this.resources["food"].quantity += efficiency;
+                        }
+                    }
+                };
+            },
+            unlocks: ['Animal Husbandry', 'Archery', 'Mining', 'Pottery'],
+            prerequisites: ['Crafting', 'Settlement']
+        },
+        "Mining": {
+            name: 'Mining',
+            price: 15,
+            researched: ()=> {
+                this.resources['ore'] = {
+                    name: 'ore',
+                    quantity: 0,
+                    balance: ()=> {
+                        if (this.population['miner']) {
+                            return this.population['miner'].cardinality * this.population['miner'].profession.efficiency;
+                        }
+                    }
+                };
+                this.population["miner"] = {
+                    cardinality: 0,
+                    profession: {
+                        name: 'farmer',
+                        foodConsumption: 0.6,
+                        efficiency: 0.2,
+                        act: (efficiency)=> {
+                            this.resources["ore"].quantity += efficiency;
+                        }
+                    }
+                };
+            },
+            unlocks: ['Animal Husbandry', 'Archery', 'Mining', 'Pottery'],
+            prerequisites: ['Crafting', 'Settlement']
+        },
+    };
+
+
     public availableWorkers(): boolean {
         return _(this.population).filter((item: PopulationEntry)=> {
                 return item.profession.name == "idle";
@@ -281,7 +319,7 @@ class TribeController {
         while (totalFoodConsumption > this.resources["food"].quantity) {
             let numOfIdlers = this.population['idle'].cardinality;
             let index: number = Math.floor(Math.random() * _.keys(this.population).length);
-            let populationEntry: PopulationEntry = numOfIdlers > 0 ? this.population['idle'] : this.population[index];
+            let populationEntry: PopulationEntry = numOfIdlers > 0 ? this.population['idle'] : this.population[_.keys(this.population)[index]];
             if (populationEntry.cardinality > 0) {
                 totalFoodConsumption -= populationEntry.profession.foodConsumption;
                 populationEntry.cardinality--;
