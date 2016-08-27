@@ -35,7 +35,7 @@
             <tr>
                 <td>Job</td>
                 <td>Quantity</td>
-                <td>Food Consumption</td>
+                <td>Food Consumption (total:{{vm.getTotalFoodConsumed()|number:2}})</td>
                 <td>Efficiency</td>
             </tr>
             </thead>
@@ -81,7 +81,9 @@
         <table class="table table-condensed table-bordered table-hover">
             <tr ng-repeat="item in vm.environment">
                 <td>Name: {{item.name}}</td>
-                <td>Quantity: {{item.quantity | number:0}}</td>
+                <td>Quantity: {{item.quantity | number:0}} (<span
+                        ng-style="{ color: item.balance() > 0 ? 'green' :item.balance()==0?'black': 'red' }">{{item.balance()|number:2}}</span>)
+                </td>
             </tr>
         </table>
     </div>

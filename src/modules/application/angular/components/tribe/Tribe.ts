@@ -46,9 +46,14 @@ class TribeController {
         "berries": {
             name: "berries",
             quantity: 120,
+            balance: ()=> {
+                return this.environment["berries"].renewal() - this.population['gatherer'].cardinality * this.population['gatherer'].profession.efficiency;
+            },
+            renewal: ()=> {
+                return (3 / (Math.pow((this.environment["berries"].quantity - 120) / 10, 2) + 1));
+            },
             act: ()=> {
-                this.environment["berries"].quantity +=
-                    (3 / (Math.pow((this.environment["berries"].quantity - 120) / 10, 2) + 1)) / this.tickFrequency;
+                this.environment["berries"].quantity += this.environment["berries"].renewal() / this.tickFrequency;
             }
         }
     };
@@ -79,9 +84,15 @@ class TribeController {
                 {
                     name: "animals",
                     quantity: 80,
+                    renewal: ()=> {
+                        return this.environment["animals"].quantity +=
+                            (8 / (Math.pow((this.environment["animals"].quantity - 120) / 10, 2) + 1));
+                    },
+                    balance: ()=> {
+                        return this.environment["animals"].renewal() - this.population['hunter'].cardinality * this.population['hunter'].profession.efficiency;
+                    },
                     act: ()=> {
-                        this.environment["animals"].quantity +=
-                            (8 / (Math.pow((this.environment["animals"].quantity - 120) / 10, 2) + 1)) / this.tickFrequency;
+                        this.environment["animals"].quantity += this.environment["animals"].renewal() / this.tickFrequency;
                     }
 
                 }
@@ -163,9 +174,14 @@ class TribeController {
                 {
                     name: "fish",
                     quantity: 80,
+                    renewal: ()=> {
+                        return (8 / (Math.pow((this.environment["fish"].quantity - 120) / 10, 2) + 1));
+                    },
+                    balance: ()=> {
+                        return this.environment["fish"].renewal() - this.population['fisher'].cardinality * this.population['fisher'].profession.efficiency;
+                    },
                     act: ()=> {
-                        this.environment["fish"].quantity +=
-                            (8 / (Math.pow((this.environment["fish"].quantity - 120) / 10, 2) + 1)) / this.tickFrequency;
+                        this.environment["fish"].quantity += this.environment["fish"].renewal() / this.tickFrequency;
                     }
 
                 }
@@ -297,12 +313,12 @@ class TribeController {
         this.work();
         this.updateEnvironment();
     };
+
     public feed: Function = ()=> {
         this.resources["food"].quantity -= _(this.population).map((item: PopulationEntry)=> {
             return item.cardinality * item.profession.foodConsumption / this.tickFrequency;
         }).sum();
     };
-
 
     private work() {
         _(_.keys(this.population)).map((key)=> {
@@ -415,4 +431,6 @@ interface EnvironmentItem {
     name: string
     quantity: number
     act: Function
+    balance: Function
+    renewal: Function
 }
