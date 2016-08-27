@@ -255,7 +255,7 @@ class TribeController {
                     profession: {
                         name: 'farmer',
                         foodConsumption: 0.2,
-                        efficiency: 0.4,
+                        efficiency: 0.25,
                         upgradeCost: 5,
                         act: (efficiency)=> {
                             this.resources["food"].quantity += efficiency;
