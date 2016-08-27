@@ -75,7 +75,7 @@ class TribeController {
                         this.resources.food += efficiency;
                         this.environment["animals"].quantity -= efficiency;
                     } else {
-                        this.resources.food = this.environment["animals"].quantity;
+                        this.resources.food += this.environment["animals"].quantity;
                         this.environment["animals"].quantity = 0;
                     }
                 }
