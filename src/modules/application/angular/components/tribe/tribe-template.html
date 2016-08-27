@@ -10,6 +10,7 @@
                 <td>Profession: {{item.profession.name}}</td>
                 <td>Number: {{item.cardinality}}</td>
                 <td>Total Food Consumption: {{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
+                <td>Total Efficiency: {{(item.profession.efficiency * item.cardinality)|number:1}}</td>
                 <td>
                     <div class="btn-group" role="group">
                         <button class="btn btn-primary" ng-click="vm.addWorker(item)"
