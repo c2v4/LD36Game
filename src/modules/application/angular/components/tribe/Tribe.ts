@@ -19,30 +19,22 @@ class TribeController {
     public resources: Resources = {
         science: 0,
         children: 0,
-        food: 100
+        food: 10
     };
-    public availableTechs: Array<Tech> = [{
-        name: 'hunting',
-        price: 1,
-        researched: ()=> {
-            this.population.push({
-                cardinality: 0,
-                profession: {
-                    name: 'hunter',
-                    foodConsumption: 0.3,
-                    efficiency: 0.5,
-                    act: (efficiency)=> {
-                        this.resources.food += efficiency;
-
-                    }
-                }
-            });
+    public environment: Environment = {
+        "animals": {
+            quantity: 2,
+            act: ()=> {
+                this.environment["animals"].quantity +=
+                    10 / (Math.pow(this.environment["animals"].quantity / 205 - 7.5 / 2.05, 2) + 1);
+            }
         }
-    }];
+    };
+    public availableTechs: Array<Tech> = [];
 
     public population: Array<PopulationEntry> = [
         {
-            cardinality: 16,
+            cardinality: 1,
             profession: {
                 name: 'idle',
                 foodConsumption: 0.1,
@@ -71,6 +63,23 @@ class TribeController {
                     controller.resources.science += efficiency;
                 }
             }
+        },
+        {
+            cardinality: 1,
+            profession: {
+                name: 'hunter',
+                foodConsumption: 0.3,
+                efficiency: 0.5,
+                act: (efficiency)=> {
+                    if (this.environment["animals"].quantity - efficiency > 0) {
+                        this.resources.food += efficiency;
+                        this.environment["animals"].quantity -= efficiency;
+                    } else {
+                        this.resources.food = this.environment["animals"].quantity;
+                        this.environment["animals"].quantity = 0;
+                    }
+                }
+            }
         }
     ];
 
@@ -79,13 +88,14 @@ class TribeController {
                 return item.profession.name == "idle";
             }).map((item: PopulationEntry)=> {
                 return item.cardinality
-            }).value() > 0;
+            }).sum() > 0;
     }
 
     public tick: Function = ()=> {
         this.feed();
         this.work();
         this.starve();
+        this.updateEnvironment();
     };
     public feed: Function = ()=> {
         this.resources.food -= _(this.population).map((item: PopulationEntry)=> {
@@ -141,6 +151,12 @@ class TribeController {
             this.availableTechs.splice(i, 1);
         }
     }
+
+    private updateEnvironment() {
+        _(this.environment).forEach((value: EnvironmentItem)=> {
+            value.act();
+        });
+    }
 }
 interface Resources {
     food: number
@@ -164,4 +180,12 @@ interface Tech {
     name: string
     price: number
     researched: Function
+}
+
+interface Environment {
+    [key: string]: EnvironmentItem;
+}
+interface EnvironmentItem {
+    quantity: number
+    act: Function
 }
