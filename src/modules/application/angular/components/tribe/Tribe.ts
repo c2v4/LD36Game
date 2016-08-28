@@ -461,7 +461,7 @@ class TribeController {
             name: "Masonry",
             price: 22,
             researched: ()=> {
-                this.population["Crafter"].profession.efficiency *= 1.5;
+                this.population["Crafter"].profession.efficiency *= 1.3;
             },
             unlocks: ['Construction'],
             prerequisites: ['Mining']
@@ -536,8 +536,10 @@ class TribeController {
             name: "Currency",
             price: 86,
             researched: ()=> {
-                _(_.keys(this.population)).forEach((key)=> {
-                    this.population[key].cardinality *= Math.ceil(this.population[key].cardinality * 1.2);
+                _(_.keys(this.resources)).filter((key)=> {
+                    return key != "Children";
+                }).forEach((key)=> {
+                    this.resources[key].quantity = Math.ceil(this.resources[key].quantity * 1.2);
                 });
             },
             unlocks: ['Potato'],
@@ -646,6 +648,8 @@ class TribeController {
                 /*
                  POTATO RESEARCHED!
                  */
+                this.paused = true;
+                alert("Congratulations! You've researched allmighty ancient technology!")
             },
             prerequisites: ['Irrigation', 'Engineering'],
             unlocks: ['Potato']
