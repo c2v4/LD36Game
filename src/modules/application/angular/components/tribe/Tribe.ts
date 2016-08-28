@@ -19,13 +19,16 @@ class TribeController {
     public step: number = 1;
     public tickFrequency = 4;
     public upgradeEfficiency: number = 1.1;
+    public historyAccess: boolean = false;
+    public calendarAccess: boolean = false;
+    public detailedView: boolean = false;
 
     public availableSteps: Array<number> = [];
 
     public resources: Resources = {
         Science: {
             name: "Science",
-            quantity: 50,
+            quantity: 0,
             balanceNumber: 0,
             balance: ()=> {
                 let number = this.population['Scientist'].cardinality * this.population['Idle'].profession.efficiency;
@@ -141,7 +144,7 @@ class TribeController {
             researched: ()=> {
                 this.resources['Tools'] = {
                     name: 'Tools',
-                    quantity: 100,
+                    quantity: 0,
                     balanceNumber: 0,
                     balance: ()=> {
                         if (this.population['Crafter']) {
@@ -272,7 +275,14 @@ class TribeController {
                     balanceNumber: 0,
                     balance: ()=> {
                         if (this.population['Miner']) {
-                            return this.population['Miner'].cardinality * this.population['Miner'].profession.efficiency;
+                            let balance: number = this.population['Miner'].cardinality * this.population['Miner'].profession.efficiency;
+                            let metallurgistEfficiency = this.population["Metallurgist"].profession.efficiency * this.population["Metallurgist"].cardinality;
+                            if (this.resources["Ore"].quantity > metallurgistEfficiency) {
+                                balance -= metallurgistEfficiency / this.tickFrequency;
+                            } else {
+                                balance -= this.environment["Ore"].quantity / this.tickFrequency;
+                            }
+                            return balance;
                         }
                     }
                 };
@@ -334,7 +344,7 @@ class TribeController {
         },
         "The Wheel": {
             name: 'The Wheel',
-            price: 16,
+            price: 25,
             researched: ()=> {
                 this.upgradeEfficiency += 0.1;
             },
@@ -343,29 +353,148 @@ class TribeController {
         },
         "Trapping": {
             name: "Trapping",
-            price: 16,
+            price: 23,
             researched: ()=> {
                 this.population["Hunter"].profession.efficiency += 0.3;
             },
-            unlocks: ['Mathematics', 'Horseback Riding'],
+            unlocks: ['Horseback Riding'],
             prerequisites: ['Animal Husbandry', 'Archery']
         },
         "Bronze Working": {
             name: "Bronze Working",
-            price: 16,
+            price: 32,
             researched: ()=> {
                 this.population["Metallurgist"] = {
                     cardinality: 0,
                     profession: {
                         name: 'Metallurgist',
-                        foodConsumption: 0.3,
-                        efficiency: 0.7,
+                        foodConsumption: 0.5,
+                        efficiency: 0.3,
                         upgradeCost: 7,
                     }
                 };
+                this.resources["Bronze"] = {
+                    name: 'Bronze',
+                    quantity: 0,
+                    balanceNumber: 0,
+                    balance: ()=> {
+                        let balance: number = 0;
+                        let metallurgistEfficiency = this.population["Metallurgist"].profession.efficiency * this.population["Metallurgist"].cardinality;
+                        if (this.resources["Ore"].quantity > metallurgistEfficiency) {
+                            balance += metallurgistEfficiency / 2;
+                        } else {
+                            balance += this.environment["Ore"].quantity / 2;
+                        }
+                        return balance;
+                    }
+                }
             },
-            unlocks: ['Mathematics', 'Horseback Riding'],
-            prerequisites: ['Animal Husbandry', 'Archery']
+            unlocks: ['Iron Working'],
+            prerequisites: ['Mining']
+        },
+        "Masonry": {
+            name: "Masonry",
+            price: 22,
+            researched: ()=> {
+                this.population["Crafter"].profession.efficiency *= 1.5;
+            },
+            unlocks: ['Construction'],
+            prerequisites: ['Mining']
+        },
+        "Writing": {
+            name: "Writing",
+            price: 6,
+            researched: ()=> {
+                this.historyAccess = true;
+            },
+            unlocks: ['Alphabet'],
+            prerequisites: ['Drama and Poetry', 'Philosophy']
+        },
+        "Calendar": {
+            name: "Calendar",
+            price: 7,
+            researched: ()=> {
+                this.calendarAccess = true;
+            },
+            unlocks: ['Pottery'],
+            prerequisites: ['Philosophy']
+        },
+        "Sailing": {
+            name: "Sailing",
+            price: 12,
+            researched: ()=> {
+                this.resources["Fish"].quantity *= 2;
+                this.resources["Fish"]['renewal'] = ()=> {
+                    return (12 / (Math.pow((this.environment["Fish"].quantity - 240) / 10, 2) + 1));
+                };
+            },
+            unlocks: ['Optics'],
+            prerequisites: ['Fishing', 'Pottery']
+        },
+        "Irrigation": {
+            name: "Irrigation",
+            price: 26,
+            researched: ()=> {
+                this.resources["Berries"].quantity *= 2;
+                this.resources["Berries"]['renewal'] = ()=> {
+                    return (12 / (Math.pow((this.environment["Berries"].quantity - 240) / 10, 2) + 1));
+                };
+            },
+            unlocks: ['Aqueduct'],
+            prerequisites: ['Pottery']
+        },
+        "Mathematics": {
+            name: "Mathematics",
+            price: 19,
+            researched: ()=> {
+                this.detailedView = true;
+            },
+            unlocks: ['Currency'],
+            prerequisites: ['The Wheel', 'Writing']
+        },
+        "Construction": {
+            name: "Construction",
+            price: 48,
+            researched: ()=> {
+                _(_.keys(this.population)).forEach((key)=> {
+                    this.population[key].profession.efficiency *= 1.1;
+                });
+            },
+            unlocks: ['Engineering'],
+            prerequisites: ['The Wheel', 'Masonry']
+        },
+        "Currency": {
+            name: "Currency",
+            price: 86,
+            researched: ()=> {
+                _(_.keys(this.population)).forEach((key)=> {
+                    this.population[key].cardinality *= 1.2;
+                });
+            },
+            unlocks: ['Potato'],
+            prerequisites: ['Mathematics']
+        },
+        "Engineering": {
+            name: "Engineering",
+            price: 97,
+            researched: ()=> {
+                _(_.keys(this.population)).forEach((key)=> {
+                    this.population[key].profession.upgradeCost *= 0.5;
+                });
+            },
+            prerequisites: ['Mathematics', 'Construction'],
+            unlocks: ['Aqueduct']
+        },
+        "Iron Working": {
+            name: "Iron Working",
+            price: 70,
+            researched: ()=> {
+                _(_.keys(this.population)).forEach((key)=> {
+                    this.population[key].profession.upgradeCost *= 0.5;
+                });
+            },
+            prerequisites: ['Mathematics', 'Construction'],
+            unlocks: ['Potato']
         },
     };
 
