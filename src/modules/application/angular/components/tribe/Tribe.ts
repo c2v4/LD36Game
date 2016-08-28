@@ -112,9 +112,6 @@ class TribeController {
                         foodConsumption: 0.3,
                         efficiency: 0.5,
                         upgradeCost: 1,
-                        act: (efficiency)=> {
-
-                        }
                     }
                 };
                 this.environment["Animals"] =
@@ -158,9 +155,6 @@ class TribeController {
                         foodConsumption: 0.5,
                         efficiency: 0.01,
                         upgradeCost: 8,
-                        act: (efficiency)=> {
-
-                        }
                     }
                 };
             },
@@ -196,8 +190,6 @@ class TribeController {
                         foodConsumption: 0.3,
                         efficiency: 0.5,
                         upgradeCost: 1,
-                        act: (efficiency)=> {
-                        }
                     }
                 };
                 this.environment["Fish"] =
@@ -229,10 +221,6 @@ class TribeController {
                 foodConsumption: 0.1,
                 efficiency: 0.01,
                 upgradeCost: 3,
-                act: (efficiency: number, controller: TribeController)=> {
-
-
-                }
             }
         },
         Scientist: {
@@ -242,9 +230,6 @@ class TribeController {
                 foodConsumption: 0.4,
                 efficiency: 0.01,
                 upgradeCost: 6,
-                act: (efficiency: number, controller: TribeController)=> {
-                    controller.resources["Science"].quantity += efficiency;
-                }
             }
         },
         Gatherer: {
@@ -254,15 +239,6 @@ class TribeController {
                 foodConsumption: 0.2,
                 efficiency: 0.3,
                 upgradeCost: 1,
-                act: (efficiency)=> {
-                    if (this.environment["Berries"].quantity - efficiency > 0) {
-                        this.resources["Food"].quantity += efficiency;
-                        this.environment["Berries"].quantity -= efficiency;
-                    } else {
-                        this.resources["Food"].quantity += this.environment["Berries"].quantity;
-                        this.environment["Berries"].quantity = 0;
-                    }
-                }
             }
         }
     };
@@ -279,9 +255,6 @@ class TribeController {
                         foodConsumption: 0.2,
                         efficiency: 0.5,
                         upgradeCost: 5,
-                        act: (efficiency)=> {
-                            // this.resources["Food"].quantity += efficiency;
-                        }
                     }
                 };
             },
@@ -309,9 +282,6 @@ class TribeController {
                         foodConsumption: 0.6,
                         efficiency: 0.2,
                         upgradeCost: 5,
-                        act: (efficiency)=> {
-                            this.resources["Ore"].quantity += efficiency;
-                        }
                     }
                 };
             },
@@ -329,9 +299,6 @@ class TribeController {
                         foodConsumption: 0.3,
                         efficiency: 0.7,
                         upgradeCost: 7,
-                        act: (efficiency)=> {
-
-                        }
                     }
                 };
             },
@@ -358,9 +325,6 @@ class TribeController {
                         foodConsumption: 0.4,
                         efficiency: 0.04,
                         upgradeCost: 7,
-                        act: (efficiency)=> {
-
-                        }
                     }
                 };
             },
@@ -380,8 +344,6 @@ class TribeController {
 
     public tick: Function = ()=> {
         this.starve();
-        // this.feed();
-        this.work();
         this.updateResources();
         this.breed();
         this.updateEnvironment();
@@ -395,18 +357,6 @@ class TribeController {
         });
     }
 
-
-    // public feed(): void {
-    //     this.resources["Food"].quantity -= this.getTotalFoodConsumed();
-    // };
-
-    private work() {
-        _(_.keys(this.population)).map((key)=> {
-            return this.population[key]
-        }).forEach((entry: PopulationEntry)=> {
-            entry.profession.act(entry.profession.efficiency / this.tickFrequency * entry.cardinality, this.controller);
-        })
-    }
 
     public addWorker(worker: PopulationEntry): void {
         let diff = (this.population['Idle'].cardinality < this.step) ? this.population['Idle'].cardinality : +this.step;
@@ -515,7 +465,6 @@ interface Profession {
     name: string
     foodConsumption: number
     efficiency: number
-    act: Function
     upgradeCost: number
 }
 interface Population {
