@@ -17,9 +17,9 @@ class TribeController {
         this._allTechs = value;
     }
 
-    static $inject: Array<string> = ['$interval', '$mdDialog'];
+    static $inject: Array<string> = ['$interval', '$mdDialog', '$mdPanel'];
 
-    constructor(public $interval: IIntervalService, public $mdDialog: angular.material.IDialogService) {
+    constructor(public $interval: IIntervalService, public $mdDialog: angular.material.IDialogService, public $mdPanel: angular.material.IPanelService) {
         $interval(this.tick, 1000 / this.tickFrequency);
         this.updateStep();
     }
@@ -304,22 +304,28 @@ class TribeController {
                     quantity: 0,
                     balanceNumber: 0,
                     balance: ()=> {
+                        let balance: number = 0;
                         if (this.population['Miner']) {
-                            let balance: number = this.population['Miner'].cardinality * this.population['Miner'].profession.efficiency;
+                            balance += this.population['Miner'].cardinality * this.population['Miner'].profession.efficiency;
+                        }
+                        if (this.population["Metallurgist"]) {
                             let metallurgistEfficiency = this.population["Metallurgist"].profession.efficiency * this.population["Metallurgist"].cardinality;
                             if (this.resources["Ore"].quantity > metallurgistEfficiency) {
                                 balance -= metallurgistEfficiency / this.tickFrequency;
                             } else {
-                                balance -= this.environment["Ore"].quantity / this.tickFrequency;
+                                balance -= this.resources["Ore"].quantity / this.tickFrequency;
                             }
+                        }
+                        if (this.population["Ironmaster"]) {
                             let ironmasterEfficiency = this.population["Ironmaster"].profession.efficiency * this.population["Ironmaster"].cardinality;
                             if (this.resources["Ore"].quantity > ironmasterEfficiency) {
                                 balance -= ironmasterEfficiency / this.tickFrequency;
                             } else {
-                                balance -= this.environment["Ore"].quantity / this.tickFrequency;
+                                balance -= this.resources["Ore"].quantity / this.tickFrequency;
                             }
-                            return balance;
                         }
+
+                        return balance;
                     }
                 };
                 this.population["Miner"] = {
@@ -375,8 +381,8 @@ class TribeController {
                     }
                 };
             },
-            unlocks: ['The Wheel', 'Trapping'],
-            prerequisites: ['Hunting', 'Agriculture']
+            unlocks: ['Writing', 'Calendar', 'Sailing', 'Irrigation'],
+            prerequisites: ['Agriculture']
         },
         "The Wheel": {
             name: 'The Wheel',
@@ -419,7 +425,7 @@ class TribeController {
                         if (this.resources["Ore"].quantity > metallurgistEfficiency) {
                             balance += metallurgistEfficiency / 2;
                         } else {
-                            balance += this.environment["Ore"].quantity / 2;
+                            balance += this.resources["Ore"].quantity / 2;
                         }
                         let crafterEfficiency = this.population['Crafter'].cardinality * this.population['Crafter'].profession.efficiency;
                         if (this.resources["Iron"]) {
@@ -456,10 +462,13 @@ class TribeController {
             name: "Writing",
             price: 6,
             researched: ()=> {
-                this.historyAccess = true;
+                _(_.keys(this.population)).forEach((key)=> {
+                    this.population[key].profession.foodConsumption *= (0.8 + Math.random() * 0.4);
+                    this.population[key].profession.efficiency *= (0.8 + Math.random() * 0.4);
+                });
             },
-            unlocks: ['Alphabet'],
-            prerequisites: ['Drama and Poetry', 'Philosophy']
+            unlocks: ['Drama and Poetry', 'Philosophy'],
+            prerequisites: ['Alphabet']
         },
         "Calendar": {
             name: "Calendar",
@@ -468,27 +477,27 @@ class TribeController {
                 this.calendarAccess = true;
                 this.date = moment().subtract(3000, 'years');
             },
-            unlocks: ['Pottery'],
-            prerequisites: ['Philosophy']
+            unlocks: ['Philosophy'],
+            prerequisites: ['Pottery']
         },
         "Sailing": {
             name: "Sailing",
             price: 12,
             researched: ()=> {
-                this.resources["Fish"].quantity *= 2;
-                this.resources["Fish"]['renewal'] = ()=> {
+                this.environment["Fish"].quantity *= 2;
+                this.environment["Fish"]['renewal'] = ()=> {
                     return (12 / (Math.pow((this.environment["Fish"].quantity - 240) / 10, 2) + 1));
                 };
             },
-            unlocks: ['Optics'],
+            unlocks: ['Cartography'],
             prerequisites: ['Fishing', 'Pottery']
         },
         "Irrigation": {
             name: "Irrigation",
             price: 26,
             researched: ()=> {
-                this.resources["Berries"].quantity *= 2;
-                this.resources["Berries"]['renewal'] = ()=> {
+                this.environment["Berries"].quantity *= 2;
+                this.environment["Berries"]['renewal'] = ()=> {
                     return (12 / (Math.pow((this.environment["Berries"].quantity - 240) / 10, 2) + 1));
                 };
             },
@@ -520,7 +529,7 @@ class TribeController {
             price: 86,
             researched: ()=> {
                 _(_.keys(this.population)).forEach((key)=> {
-                    this.population[key].cardinality *= 1.2;
+                    this.population[key].cardinality *= Math.ceil(this.population[key].cardinality * 1.2);
                 });
             },
             unlocks: ['Potato'],
@@ -560,7 +569,7 @@ class TribeController {
                         if (this.resources["Ore"].quantity > metallurgistEfficiency) {
                             balance += metallurgistEfficiency / 4;
                         } else {
-                            balance += this.environment["Ore"].quantity / 4;
+                            balance += this.resources["Ore"].quantity / 4;
                         }
                         let crafterEfficiency = this.population['Crafter'].cardinality * this.population['Crafter'].profession.efficiency;
                         if (this.resources["Iron"].quantity > crafterEfficiency) {
@@ -589,7 +598,7 @@ class TribeController {
             unlocks: ['Potato']
         },
         "Drama and Poetry": {
-            name: "Cartography",
+            name: "Drama and Poetry",
             price: 110,
             researched: ()=> {
                 _(_.keys(this.population)).forEach((key)=> {
@@ -612,8 +621,8 @@ class TribeController {
             name: "Aqueduct",
             price: 119,
             researched: ()=> {
-                this.resources["Berries"].quantity *= 4;
-                this.resources["Berries"]['renewal'] = ()=> {
+                this.environment["Berries"].quantity *= 4;
+                this.environment["Berries"]['renewal'] = ()=> {
                     return (24 / (Math.pow((this.environment["Berries"].quantity - 480) / 10, 2) + 1));
                 };
             },

@@ -2,15 +2,18 @@
     <div layout="column">
         <div layout="row" flex="20">
             <div flex="33">
-
+                <md-button ng-show="vm.historyAccess" class="md-primary md-raised"
+                           ng-click="vm.showHistory()">
+                    History
+                </md-button>
             </div>
             <div flex="33">
                 <h1>
                     TRIBE
                 </h1>
             </div>
-            <div flex="33" ng-show="vm.calendarAccess">
-                <h2>{{vm.date.format("Do MMMM YYYY")}}
+            <div flex="33">
+                <h2 ng-show="vm.calendarAccess">{{vm.date.format("Do MMMM YYYY")}}
                 </h2>
             </div>
         </div>
