@@ -41,7 +41,7 @@ class TribeController {
     public resources: Resources = {
         Science: {
             name: "Science",
-            quantity: 5000,
+            quantity: 0,
             balanceNumber: 0,
             balance: ()=> {
                 let number = this.population['Scientist'].cardinality * this.population['Idle'].profession.efficiency;
@@ -59,7 +59,7 @@ class TribeController {
         },
         Food: {
             name: "Food",
-            quantity: 1000000,
+            quantity: 10,
             balanceNumber: 0,
             balance: ()=> {
                 let balance: number = -this.getTotalFoodConsumed();
@@ -251,7 +251,7 @@ class TribeController {
     };
     public population: Population = {
         Idle: {
-            cardinality: 100,
+            cardinality: 1,
             profession: {
                 name: 'Idle',
                 foodConsumption: 0.1,
