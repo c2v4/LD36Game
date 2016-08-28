@@ -13,26 +13,26 @@
                         <h3>Resources</h3>
                     </div>
                     <table class="table table-condensed table-bordered">
-                        <tr ng-class="vm.resources['Children'].balance()>0?'success':'info'">
+                        <tr ng-class="vm.resources['Children'].balanceNumber>0?'success':'info'">
                             <td>{{vm.resources['Children'].name}}</td>
                             <td>
                                 <div class="progress-bar  progress-bar-striped " role="progressbar"
                                      aria-valuenow="{{vm.resources['Children'].quantity}}"
                                      aria-valuemin="0" aria-valuemax="1"
                                      style="width:{{vm.resources['Children'].quantity*100}}%"
-                                     ng-class="vm.resources['Children'].balance() > 0 ? 'progress-bar-success active ' : '' ">
+                                     ng-class="vm.resources['Children'].balanceNumber > 0 ? 'progress-bar-success active ' : '' ">
                                     <span style="white-space: nowrap;color: black">{{vm.resources['Children'].quantity*100|number:0}}%
-                                    ({{vm.resources['Children'].balance()|number:2}})</span>
+                                    ({{vm.resources['Children'].balanceNumber|number:2}})</span>
                                 </div>
                             </td>
                         </tr>
                         <tr ng-repeat="resource in vm.resources" ng-if="resource.name != 'Children'"
-                            ng-class="resource.balance()>0?'success':resource.balance()==0?'info':'danger'">
+                            ng-class="resource.balanceNumber>0?'success':resource.balanceNumber==0?'info':'danger'">
                             <td>
                                 {{resource.name}}
                             </td>
                             <td>{{resource.quantity|number:2}} (<span
-                                    ng-style="{ color: resource.balance() > 0 ? 'green' :resource.balance()==0?'black': 'red' }">{{resource.balance()|number:2}}</span>)
+                                    ng-style="{ color: resource.balanceNumber > 0 ? 'green' :resource.balanceNumber==0?'black': 'red' }">{{resource.balanceNumber|number:2}}</span>)
                             </td>
                         </tr>
                     </table>
@@ -122,7 +122,7 @@
                         <td>{{item.price}}</td>
                         <td>
                             <md-button class="md-raised md-primary" ng-click="vm.research(item)"
-                                       ng-disabled="item.price>vm.resources['science'].quantity">
+                                       ng-disabled="item.price>vm.resources['Science'].quantity">
                                 Research
                                 <md-tooltip md-direction="left">
                                     <md-list>
