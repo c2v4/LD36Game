@@ -1,18 +1,18 @@
 <md-content>
     <div layout="column">
         <div layout="row" flex="20">
-            <div flex="33">
-                <md-button ng-show="vm.historyAccess" class="md-primary md-raised"
-                           ng-click="vm.showHistory()">
-                    History
+            <div flex="33" layout="row" layout-align="center center">
+                <md-button class="md-raised md-primary" aria-label="add"
+                           ng-click="vm.paused=!vm.paused">
+                    {{vm.paused?'Unpause':'Pause'}}
                 </md-button>
             </div>
-            <div flex="33">
+            <div flex="33" layout="row" layout-align="center center">
                 <h1>
                     TRIBE
                 </h1>
             </div>
-            <div flex="33">
+            <div flex="33" layout="row" layout-align="center center">
                 <h2 ng-show="vm.calendarAccess">{{vm.date.format("Do MMMM YYYY")}}
                 </h2>
             </div>
@@ -93,7 +93,8 @@
                         </td>
                         <td>{{(item.profession.efficiency)|number:3}}<span ng-show="vm.detailedView">(total: {{(item.profession.efficiency * item.cardinality)|number:3}}) </span>
                             <md-button class="md-raised md-primary" ng-click="vm.upgrade(item.profession)"
-                                       ng-disabled="!vm.resources['Tools']||item.profession.upgradeCost > vm.resources['Tools'].quantity">
+                                       ng-show="vm.resources['Tools']"
+                                       ng-disabled="item.profession.upgradeCost > vm.resources['Tools'].quantity">
                                 Upgrade
                                 ({{item.profession.upgradeCost|number:1}} Tools)
                             </md-button>
@@ -109,12 +110,6 @@
                                        ng-disabled="!(item.cardinality>0 && item.profession.name!='Idle')">
                                 -
                             </md-button>
-                            <!--<div class="btn-group" role="group">-->
-                            <!--<button class="btn btn-primary" >+-->
-                            <!--</button>-->
-                            <!--<button class="btn btn-primary" >- -->
-                            <!--</button>-->
-                            <!--</div>-->
                         </td>
                     </tr>
                 </table>
@@ -157,4 +152,5 @@
             <h2>No man's knowledge here can go beyond his experience</h2>
         </div>
     </div>
+    <h4>Created by c2v4 for Ludum Dare #36</h4>
 </md-content>

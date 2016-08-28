@@ -6,6 +6,7 @@ import "angular-material/angular-material.css";
 import "angular-material/angular-material.js";
 import "angular-aria/angular-aria.js";
 import "angular-animate/angular-animate.js";
+import "angular-cookies/angular-cookies.js";
 import "./styles/screen.scss";
 
 // load our default (non specific) css
