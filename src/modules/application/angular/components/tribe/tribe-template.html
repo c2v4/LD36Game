@@ -21,10 +21,9 @@
                                      aria-valuemin="0" aria-valuemax="1"
                                      style="width:{{vm.resources['Children'].quantity*100}}%"
                                      ng-class="vm.resources['Children'].balance() > 0 ? 'progress-bar-success active ' : '' ">
-                                    {{vm.resources['Children'].quantity*100|number:0}}%
-                                    ({{vm.resources['Children'].balance()|number:2}})
+                                    <span style="white-space: nowrap;color: black">{{vm.resources['Children'].quantity*100|number:0}}%
+                                    ({{vm.resources['Children'].balance()|number:2}})</span>
                                 </div>
-
                             </td>
                         </tr>
                         <tr ng-repeat="resource in vm.resources" ng-if="resource.name != 'Children'"
