@@ -1,5 +1,7 @@
 import IIntervalService = angular.IIntervalService;
 import * as _ from "lodash";
+import moment = require("moment");
+import Moment = moment.Moment;
 
 export class Tribe implements ng.IComponentOptions {
     public controller: Function = TribeController;
@@ -7,6 +9,13 @@ export class Tribe implements ng.IComponentOptions {
     public controllerAs: string = "vm"
 }
 class TribeController {
+    get allTechs(): TechTree {
+        return this._allTechs;
+    }
+
+    set allTechs(value: TechTree) {
+        this._allTechs = value;
+    }
 
     static $inject: Array<string> = ['$interval', '$mdDialog'];
 
@@ -22,6 +31,8 @@ class TribeController {
     public historyAccess: boolean = false;
     public calendarAccess: boolean = false;
     public detailedView: boolean = false;
+    public philosophyAccess: boolean = false;
+    public date: Moment;
 
     public availableSteps: Array<number> = [];
 
@@ -148,7 +159,26 @@ class TribeController {
                     balanceNumber: 0,
                     balance: ()=> {
                         if (this.population['Crafter']) {
-                            return this.population['Crafter'].cardinality * this.population['Crafter'].profession.efficiency;
+                            let balance: number = 0;
+                            let crafterEfficiency = this.population['Crafter'].cardinality * this.population['Crafter'].profession.efficiency;
+                            if (this.resources["Iron"]) {
+                                if (this.resources["Iron"].quantity > crafterEfficiency) {
+                                    return 6 * crafterEfficiency;
+                                } else {
+                                    balance += 6 * this.resources["Iron"].quantity;
+                                    crafterEfficiency -= this.resources["Iron"].quantity;
+                                }
+                            }
+                            if (this.resources["Bronze"] && crafterEfficiency > 0) {
+                                if (this.resources["Bronze"].quantity > crafterEfficiency) {
+                                    balance += 3 * crafterEfficiency;
+                                } else {
+                                    balance += 3 * this.resources["Bronze"].quantity;
+                                }
+                                crafterEfficiency -= this.resources["Bronze"].quantity;
+                            }
+                            balance += crafterEfficiency;
+                            return balance;
                         }
                     }
                 };
@@ -247,7 +277,7 @@ class TribeController {
         }
     };
 
-    public allTechs: TechTree = {
+    private _allTechs: TechTree = {
         "Agriculture": {
             name: 'Agriculture',
             price: 10,
@@ -279,6 +309,12 @@ class TribeController {
                             let metallurgistEfficiency = this.population["Metallurgist"].profession.efficiency * this.population["Metallurgist"].cardinality;
                             if (this.resources["Ore"].quantity > metallurgistEfficiency) {
                                 balance -= metallurgistEfficiency / this.tickFrequency;
+                            } else {
+                                balance -= this.environment["Ore"].quantity / this.tickFrequency;
+                            }
+                            let ironmasterEfficiency = this.population["Ironmaster"].profession.efficiency * this.population["Ironmaster"].cardinality;
+                            if (this.resources["Ore"].quantity > ironmasterEfficiency) {
+                                balance -= ironmasterEfficiency / this.tickFrequency;
                             } else {
                                 balance -= this.environment["Ore"].quantity / this.tickFrequency;
                             }
@@ -385,6 +421,21 @@ class TribeController {
                         } else {
                             balance += this.environment["Ore"].quantity / 2;
                         }
+                        let crafterEfficiency = this.population['Crafter'].cardinality * this.population['Crafter'].profession.efficiency;
+                        if (this.resources["Iron"]) {
+                            if (this.resources["Iron"].quantity > crafterEfficiency) {
+                                return balance
+                            } else {
+                                crafterEfficiency -= this.resources["Iron"].quantity;
+                            }
+                        }
+                        if (crafterEfficiency > 0) {
+                            if (this.resources["Bronze"].quantity > crafterEfficiency) {
+                                balance -= crafterEfficiency;
+                            } else {
+                                balance = 0;
+                            }
+                        }
                         return balance;
                     }
                 }
@@ -415,6 +466,7 @@ class TribeController {
             price: 7,
             researched: ()=> {
                 this.calendarAccess = true;
+                this.date = moment().subtract(3000, 'years');
             },
             unlocks: ['Pottery'],
             prerequisites: ['Philosophy']
@@ -489,11 +541,94 @@ class TribeController {
             name: "Iron Working",
             price: 70,
             researched: ()=> {
+                this.population["Ironmaster"] = {
+                    cardinality: 0,
+                    profession: {
+                        name: 'Ironmaster',
+                        foodConsumption: 0.5,
+                        efficiency: 0.3,
+                        upgradeCost: 7,
+                    }
+                };
+                this.resources["Iron"] = {
+                    name: 'Iron',
+                    quantity: 0,
+                    balanceNumber: 0,
+                    balance: ()=> {
+                        let balance: number = 0;
+                        let metallurgistEfficiency = this.population["Ironmaster"].profession.efficiency * this.population["Ironmaster"].cardinality;
+                        if (this.resources["Ore"].quantity > metallurgistEfficiency) {
+                            balance += metallurgistEfficiency / 4;
+                        } else {
+                            balance += this.environment["Ore"].quantity / 4;
+                        }
+                        let crafterEfficiency = this.population['Crafter'].cardinality * this.population['Crafter'].profession.efficiency;
+                        if (this.resources["Iron"].quantity > crafterEfficiency) {
+                            balance -= crafterEfficiency;
+                        } else {
+                            balance = 0;
+                        }
+                        return balance;
+                    }
+                }
+            },
+            prerequisites: ['Bronze Working'],
+            unlocks: ['Potato']
+        },
+        "Cartography": {
+            name: "Cartography",
+            price: 65,
+            researched: ()=> {
+                this.resources["Animals"].quantity *= 2;
+                this.resources["Animals"]['renewal'] = ()=> {
+                    return (12 / (Math.pow((this.environment["Animals"].quantity - 240) / 10, 2) + 1));
+                };
+
+            },
+            prerequisites: ['Mathematics', 'Sailing'],
+            unlocks: ['Potato']
+        },
+        "Drama and Poetry": {
+            name: "Cartography",
+            price: 110,
+            researched: ()=> {
                 _(_.keys(this.population)).forEach((key)=> {
-                    this.population[key].profession.upgradeCost *= 0.5;
+                    this.population[key].profession.foodConsumption *= 0.8;
                 });
             },
-            prerequisites: ['Mathematics', 'Construction'],
+            prerequisites: ['Writing'],
+            unlocks: ['Potato']
+        },
+        "Philosophy": {
+            name: "Philosophy",
+            price: 54,
+            researched: ()=> {
+                this.philosophyAccess = true;
+            },
+            prerequisites: ['Writing', 'Calendar'],
+            unlocks: ['Potato']
+        },
+        "Aqueduct": {
+            name: "Aqueduct",
+            price: 119,
+            researched: ()=> {
+                this.resources["Berries"].quantity *= 4;
+                this.resources["Berries"]['renewal'] = ()=> {
+                    return (24 / (Math.pow((this.environment["Berries"].quantity - 480) / 10, 2) + 1));
+                };
+            },
+            prerequisites: ['Irrigation', 'Engineering'],
+            unlocks: ['Potato']
+        },
+        "Potato": {
+            name: "Potato",
+            price: 169,
+            researched: ()=> {
+                /*
+                 POTATO RESEARCHED!
+                 */
+            },
+            prerequisites: ['Irrigation', 'Engineering'],
             unlocks: ['Potato']
         },
     };
@@ -512,6 +647,9 @@ class TribeController {
         this.updateResources();
         this.breed();
         this.updateEnvironment();
+        if (this.calendarAccess) {
+            this.date.add(300 / this.tickFrequency, 'days');
+        }
     };
 
     public updateResources(): void {
@@ -564,13 +702,13 @@ class TribeController {
     public research(tech: Tech) {
         this.resources["Science"].quantity -= tech.price;
         delete this.availableTechs[tech.name];
-        this.allTechs[tech.name] || delete this.allTechs[tech.name];
+        this._allTechs[tech.name] || delete this._allTechs[tech.name];
         _(tech.unlocks).forEach((newTech: string)=> {
-            if (this.allTechs[newTech] && !_(this.allTechs[newTech].prerequisites).some((prerequisite: string)=> {
-                    return this.allTechs[prerequisite] || this.availableTechs[prerequisite];
+            if (this._allTechs[newTech] && !_(this._allTechs[newTech].prerequisites).some((prerequisite: string)=> {
+                    return this._allTechs[prerequisite] || this.availableTechs[prerequisite];
                 })) {
-                this.availableTechs[newTech] = this.allTechs[newTech];
-                delete this.allTechs[newTech];
+                this.availableTechs[newTech] = this._allTechs[newTech];
+                delete this._allTechs[newTech];
             }
         });
         tech.researched();

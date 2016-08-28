@@ -1,11 +1,19 @@
 <md-content>
     <div layout="column">
-        <div layout="row" flex="20" layout-align="center center">
-            <h1>
-                TRIBE
-            </h1>
+        <div layout="row" flex="20">
+            <div flex="33">
+
+            </div>
+            <div flex="33">
+                <h1>
+                    TRIBE
+                </h1>
+            </div>
+            <div flex="33" ng-show="vm.calendarAccess">
+                <h2>{{vm.date.format("Do MMMM YYYY")}}
+                </h2>
+            </div>
         </div>
-        <div flex="10"></div>
         <div layout="row" flex="70" layout-align="space-around start">
             <section class="md-whiteframe-10dp" style="border-radius: 5px" layout="column">
                 <div id="resources" flex>
@@ -60,7 +68,8 @@
                     <tr>
                         <td>Job</td>
                         <td>Quantity</td>
-                        <td>Food Consumption (total: {{vm.getTotalFoodConsumed()|number:2}})</td>
+                        <td>Food Consumption <span
+                                ng-show="vm.detailedView">(total: {{vm.getTotalFoodConsumed()|number:2}})</span></td>
                         <td>Efficiency</td>
                         <td>
                             <md-radio-group ng-model="vm.step">
@@ -77,8 +86,9 @@
                         <td>{{item.profession.name}}</td>
                         <td>{{item.cardinality}}
                         </td>
-                        <td>{{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
-                        <td>{{(item.profession.efficiency * item.cardinality)|number:3}}
+                        <td>{{(item.profession.foodConsumption)|number:1}} <span ng-show="vm.detailedView">(total: {{(item.cardinality * item.profession.foodConsumption)|number:1}}) </span>
+                        </td>
+                        <td>{{(item.profession.efficiency)|number:3}}<span ng-show="vm.detailedView">(total: {{(item.profession.efficiency * item.cardinality)|number:3}}) </span>
                             <md-button class="md-raised md-primary" ng-click="vm.upgrade(item.profession)"
                                        ng-disabled="!vm.resources['Tools']||item.profession.upgradeCost > vm.resources['Tools'].quantity">
                                 Upgrade
@@ -139,6 +149,9 @@
                     </tr>
                 </table>
             </section>
+        </div>
+        <div flex="10" ng-show="vm.philosophyAccess">
+            <h2>No man's knowledge here can go beyond his experience</h2>
         </div>
     </div>
 </md-content>
