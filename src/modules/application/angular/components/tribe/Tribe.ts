@@ -18,13 +18,14 @@ class TribeController {
     public controller: TribeController = this;
     public step: number = 1;
     public tickFrequency = 4;
+    public upgradeEfficiency: number = 1.1;
 
     public availableSteps: Array<number> = [];
 
     public resources: Resources = {
         Science: {
             name: "Science",
-            quantity: 0,
+            quantity: 50,
             balanceNumber: 0,
             balance: ()=> {
                 let number = this.population['Scientist'].cardinality * this.population['Idle'].profession.efficiency;
@@ -140,7 +141,7 @@ class TribeController {
             researched: ()=> {
                 this.resources['Tools'] = {
                     name: 'Tools',
-                    quantity: 0,
+                    quantity: 100,
                     balanceNumber: 0,
                     balance: ()=> {
                         if (this.population['Crafter']) {
@@ -331,6 +332,41 @@ class TribeController {
             unlocks: ['The Wheel', 'Trapping'],
             prerequisites: ['Hunting', 'Agriculture']
         },
+        "The Wheel": {
+            name: 'The Wheel',
+            price: 16,
+            researched: ()=> {
+                this.upgradeEfficiency += 0.1;
+            },
+            unlocks: ['Mathematics', 'Horseback Riding'],
+            prerequisites: ['Animal Husbandry', 'Archery']
+        },
+        "Trapping": {
+            name: "Trapping",
+            price: 16,
+            researched: ()=> {
+                this.population["Hunter"].profession.efficiency += 0.3;
+            },
+            unlocks: ['Mathematics', 'Horseback Riding'],
+            prerequisites: ['Animal Husbandry', 'Archery']
+        },
+        "Bronze Working": {
+            name: "Bronze Working",
+            price: 16,
+            researched: ()=> {
+                this.population["Metallurgist"] = {
+                    cardinality: 0,
+                    profession: {
+                        name: 'Metallurgist',
+                        foodConsumption: 0.3,
+                        efficiency: 0.7,
+                        upgradeCost: 7,
+                    }
+                };
+            },
+            unlocks: ['Mathematics', 'Horseback Riding'],
+            prerequisites: ['Animal Husbandry', 'Archery']
+        },
     };
 
 
@@ -418,8 +454,8 @@ class TribeController {
     }
 
     public upgrade(profession: Profession) {
-        this.resources["tools"].quantity -= profession.upgradeCost;
-        profession.efficiency *= 1.2;
+        this.resources["Tools"].quantity -= profession.upgradeCost;
+        profession.efficiency *= this.upgradeEfficiency;
         profession.upgradeCost *= 1.6;
     }
 

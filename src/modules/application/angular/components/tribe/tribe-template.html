@@ -80,9 +80,9 @@
                         <td>{{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
                         <td>{{(item.profession.efficiency * item.cardinality)|number:3}}
                             <md-button class="md-raised md-primary" ng-click="vm.upgrade(item.profession)"
-                                       ng-disabled="!vm.resources['tools']||item.profession.upgradeCost > vm.resources['tools'].quantity">
+                                       ng-disabled="!vm.resources['Tools']||item.profession.upgradeCost > vm.resources['Tools'].quantity">
                                 Upgrade
-                                ({{item.profession.upgradeCost|number:1}} tools)
+                                ({{item.profession.upgradeCost|number:1}} Tools)
                             </md-button>
                         </td>
                         <td layout="row" layout-align="space-around center">
