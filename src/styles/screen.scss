@@ -5,6 +5,20 @@ body{
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
   display: none !important;
 }
+
+md-tooltip {
+  font-family: Roboto, 'Helvetica Neue', sans-serif;
+  .md-background {
+    border-radius: inherit;
+  }
+  .md-content {
+    height: auto;
+    width: auto;
+    max-width: 400px;
+    padding: 8px;
+    white-space: initial;
+  }
+}
 page-tweets{
   display:flex;
   flex-direction:row;

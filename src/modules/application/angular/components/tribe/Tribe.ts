@@ -8,52 +8,56 @@ export class Tribe implements ng.IComponentOptions {
 }
 class TribeController {
 
-    static $inject: Array<string> = ['$interval'];
+    static $inject: Array<string> = ['$interval', '$mdDialog'];
 
-    constructor(public $interval: IIntervalService) {
+    constructor(public $interval: IIntervalService, public $mdDialog: angular.material.IDialogService) {
         $interval(this.tick, 1000 / this.tickFrequency);
+        this.updateStep();
     }
 
     public controller: TribeController = this;
-
+    public step: number = 1;
     public tickFrequency = 4;
+
+    public availableSteps: Array<number> = [];
+
     public resources: Resources = {
-        science: {
-            name: "science",
+        Science: {
+            name: "Science",
             quantity: 0,
             balance: ()=> {
-                return this.population['scientist'].cardinality * this.population['idle'].profession.efficiency;
+                return this.population['Scientist'].cardinality * this.population['Idle'].profession.efficiency;
             }
         },
-        children: {
-            name: "children",
+        Children: {
+            name: "Children",
             quantity: 0,
             balance: ()=> {
-                return this.population['idle'].cardinality * this.population['idle'].profession.efficiency;
+                return this.population['Idle'].cardinality * this.population['Idle'].profession.efficiency;
             }
         },
-        food: {
-            name: "food",
+        Food: {
+            name: "Food",
             quantity: 10,
             balance: ()=> {
-                return _(['hunter', 'gatherer', 'fisher', 'farmer']).map((worker)=> {
+                return _(['Hunter', 'Gatherer', 'Fisher', 'Farmer']).map((worker)=> {
                         return this.population[worker] ? (this.population[worker].cardinality * this.population[worker].profession.efficiency) : 0;
                     }).sum() - this.getTotalFoodConsumed()
             }
         }
     };
     public environment: Environment = {
-        "berries": {
-            name: "berries",
+        "Berries": {
+            name: "Berries",
             quantity: 120,
             balance: ()=> {
-                return this.environment["berries"].renewal() - this.population['gatherer'].cardinality * this.population['gatherer'].profession.efficiency;
+                return this.environment["Berries"].renewal() - this.population['Gatherer'].cardinality * this.population['Gatherer'].profession.efficiency;
             },
             renewal: ()=> {
-                return (3 / (Math.pow((this.environment["berries"].quantity - 120) / 10, 2) + 1));
+                return (3 / (Math.pow((this.environment["Berries"].quantity - 120) / 10, 2) + 1));
             },
             act: ()=> {
-                this.environment["berries"].quantity += this.environment["berries"].renewal() / this.tickFrequency;
+                this.environment["Berries"].quantity += this.environment["Berries"].renewal() / this.tickFrequency;
             }
         }
     };
@@ -62,36 +66,36 @@ class TribeController {
             name: 'Hunting',
             price: 2,
             researched: ()=> {
-                this.population["hunter"] = {
+                this.population["Hunter"] = {
                     cardinality: 0,
                     profession: {
-                        name: 'hunter',
-                        foodConsumption: 0.3,
+                        name: 'Hunter',
+                        FoodConsumption: 0.3,
                         efficiency: 0.5,
                         upgradeCost: 1,
                         act: (efficiency)=> {
-                            if (this.environment["animals"].quantity - efficiency > 0) {
-                                this.resources["food"].quantity += efficiency;
-                                this.environment["animals"].quantity -= efficiency;
+                            if (this.environment["Animals"].quantity - efficiency > 0) {
+                                this.resources["Food"].quantity += efficiency;
+                                this.environment["Animals"].quantity -= efficiency;
                             } else {
-                                this.resources["food"].quantity += this.environment["animals"].quantity;
-                                this.environment["animals"].quantity = 0;
+                                this.resources["Food"].quantity += this.environment["Animals"].quantity;
+                                this.environment["Animals"].quantity = 0;
                             }
                         }
                     }
                 };
-                this.environment["animals"] =
+                this.environment["Animals"] =
                 {
-                    name: "animals",
+                    name: "Animals",
                     quantity: 80,
                     renewal: ()=> {
-                        return (8 / (Math.pow((this.environment["animals"].quantity - 120) / 10, 2) + 1));
+                        return (6 / (Math.pow((this.environment["Animals"].quantity - 120) / 10, 2) + 1));
                     },
                     balance: ()=> {
-                        return this.environment["animals"].renewal() - this.population['hunter'].cardinality * this.population['hunter'].profession.efficiency;
+                        return this.environment["Animals"].renewal() - this.population['Hunter'].cardinality * this.population['Hunter'].profession.efficiency;
                     },
                     act: ()=> {
-                        this.environment["animals"].quantity += this.environment["animals"].renewal() / this.tickFrequency;
+                        this.environment["Animals"].quantity += this.environment["Animals"].renewal() / this.tickFrequency;
                     }
 
                 }
@@ -108,16 +112,16 @@ class TribeController {
                     name: 'tools',
                     quantity: 0,
                     balance: ()=> {
-                        if (this.population['crafter']) {
-                            return this.population['crafter'].cardinality * this.population['crafter'].profession.efficiency;
+                        if (this.population['Crafter']) {
+                            return this.population['Crafter'].cardinality * this.population['Crafter'].profession.efficiency;
                         }
                     }
                 };
-                this.population["crafter"] = {
+                this.population["Crafter"] = {
                     cardinality: 0,
                     profession: {
-                        name: 'crafter',
-                        foodConsumption: 0.5,
+                        name: 'Crafter',
+                        FoodConsumption: 0.5,
                         efficiency: 0.01,
                         upgradeCost: 8,
                         act: (efficiency)=> {
@@ -151,36 +155,36 @@ class TribeController {
             name: 'Fishing',
             price: 2,
             researched: ()=> {
-                this.population["fisher"] = {
+                this.population["Fisher"] = {
                     cardinality: 0,
                     profession: {
-                        name: 'fisher',
-                        foodConsumption: 0.3,
+                        name: 'Fisher',
+                        FoodConsumption: 0.3,
                         efficiency: 0.5,
                         upgradeCost: 1,
                         act: (efficiency)=> {
-                            if (this.environment["fish"].quantity - efficiency > 0) {
-                                this.resources["food"].quantity += efficiency;
-                                this.environment["fish"].quantity -= efficiency;
+                            if (this.environment["Fish"].quantity - efficiency > 0) {
+                                this.resources["Food"].quantity += efficiency;
+                                this.environment["Fish"].quantity -= efficiency;
                             } else {
-                                this.resources["food"].quantity += this.environment["fish"].quantity;
-                                this.environment["fish"].quantity = 0;
+                                this.resources["Food"].quantity += this.environment["Fish"].quantity;
+                                this.environment["Fish"].quantity = 0;
                             }
                         }
                     }
                 };
-                this.environment["fish"] =
+                this.environment["Fish"] =
                 {
-                    name: "fish",
+                    name: "Fish",
                     quantity: 80,
                     renewal: ()=> {
-                        return (8 / (Math.pow((this.environment["fish"].quantity - 120) / 10, 2) + 1));
+                        return (6 / (Math.pow((this.environment["Fish"].quantity - 120) / 10, 2) + 1));
                     },
                     balance: ()=> {
-                        return this.environment["fish"].renewal() - this.population['fisher'].cardinality * this.population['fisher'].profession.efficiency;
+                        return this.environment["Fish"].renewal() - this.population['Fisher'].cardinality * this.population['Fisher'].profession.efficiency;
                     },
                     act: ()=> {
-                        this.environment["fish"].quantity += this.environment["fish"].renewal() / this.tickFrequency;
+                        this.environment["Fish"].quantity += this.environment["Fish"].renewal() / this.tickFrequency;
                     }
 
                 }
@@ -191,54 +195,55 @@ class TribeController {
         }
     };
     public population: Population = {
-        idle: {
+        Idle: {
             cardinality: 1,
             profession: {
-                name: 'idle',
-                foodConsumption: 0.1,
+                name: 'Idle',
+                FoodConsumption: 0.1,
                 efficiency: 0.01,
                 upgradeCost: 3,
                 act: (efficiency: number, controller: TribeController)=> {
-                    controller.resources["children"].quantity += efficiency;
-                    var toAdd = Math.floor(controller.resources["children"].quantity);
+                    controller.resources["Children"].quantity += efficiency;
+                    var toAdd = Math.floor(controller.resources["Children"].quantity);
                     if (toAdd > 0) {
-                        controller.resources["children"].quantity -= toAdd;
+                        controller.resources["Children"].quantity -= toAdd;
                         _(controller.population).filter((item: PopulationEntry)=> {
-                            return item.profession.name == "idle";
+                            return item.profession.name == "Idle";
                         }).forEach((item: PopulationEntry)=> {
                             item.cardinality += toAdd;
                         });
+                        this.updateStep();
                     }
 
                 }
             }
         },
-        scientist: {
+        Scientist: {
             cardinality: 0,
             profession: {
-                name: 'scientist',
-                foodConsumption: 0.4,
+                name: 'Scientist',
+                FoodConsumption: 0.4,
                 efficiency: 0.01,
                 upgradeCost: 6,
                 act: (efficiency: number, controller: TribeController)=> {
-                    controller.resources["science"].quantity += efficiency;
+                    controller.resources["Science"].quantity += efficiency;
                 }
             }
         },
-        gatherer: {
+        Gatherer: {
             cardinality: 2,
             profession: {
-                name: 'gatherer',
-                foodConsumption: 0.2,
+                name: 'Gatherer',
+                FoodConsumption: 0.2,
                 efficiency: 0.3,
                 upgradeCost: 1,
                 act: (efficiency)=> {
-                    if (this.environment["berries"].quantity - efficiency > 0) {
-                        this.resources["food"].quantity += efficiency;
-                        this.environment["berries"].quantity -= efficiency;
+                    if (this.environment["Berries"].quantity - efficiency > 0) {
+                        this.resources["Food"].quantity += efficiency;
+                        this.environment["Berries"].quantity -= efficiency;
                     } else {
-                        this.resources["food"].quantity += this.environment["berries"].quantity;
-                        this.environment["berries"].quantity = 0;
+                        this.resources["Food"].quantity += this.environment["Berries"].quantity;
+                        this.environment["Berries"].quantity = 0;
                     }
                 }
             }
@@ -250,15 +255,15 @@ class TribeController {
             name: 'Agriculture',
             price: 10,
             researched: ()=> {
-                this.population["farmer"] = {
+                this.population["Farmer"] = {
                     cardinality: 0,
                     profession: {
-                        name: 'farmer',
-                        foodConsumption: 0.2,
+                        name: 'Farmer',
+                        FoodConsumption: 0.2,
                         efficiency: 0.25,
                         upgradeCost: 5,
                         act: (efficiency)=> {
-                            this.resources["food"].quantity += efficiency;
+                            this.resources["Food"].quantity += efficiency;
                         }
                     }
                 };
@@ -270,29 +275,29 @@ class TribeController {
             name: 'Mining',
             price: 15,
             researched: ()=> {
-                this.resources['ore'] = {
-                    name: 'ore',
+                this.resources['Ore'] = {
+                    name: 'Ore',
                     quantity: 0,
                     balance: ()=> {
-                        if (this.population['miner']) {
-                            return this.population['miner'].cardinality * this.population['miner'].profession.efficiency;
+                        if (this.population['Miner']) {
+                            return this.population['Miner'].cardinality * this.population['Miner'].profession.efficiency;
                         }
                     }
                 };
-                this.population["miner"] = {
+                this.population["Miner"] = {
                     cardinality: 0,
                     profession: {
-                        name: 'miner',
-                        foodConsumption: 0.6,
+                        name: 'Miner',
+                        FoodConsumption: 0.6,
                         efficiency: 0.2,
                         upgradeCost: 5,
                         act: (efficiency)=> {
-                            this.resources["ore"].quantity += efficiency;
+                            this.resources["Ore"].quantity += efficiency;
                         }
                     }
                 };
             },
-            unlocks: ['Animal Husbandry', 'Archery', 'Mining', 'Pottery'],
+            unlocks: ['Bronze Working', 'Masonry'],
             prerequisites: ['Crafting', 'Settlement']
         },
     };
@@ -300,7 +305,7 @@ class TribeController {
 
     public availableWorkers(): boolean {
         return _(this.population).filter((item: PopulationEntry)=> {
-                return item.profession.name == "idle";
+                return item.profession.name == "Idle";
             }).map((item: PopulationEntry)=> {
                 return item.cardinality
             }).sum() > 0;
@@ -314,8 +319,8 @@ class TribeController {
     };
 
     public feed: Function = ()=> {
-        this.resources["food"].quantity -= _(this.population).map((item: PopulationEntry)=> {
-            return item.cardinality * item.profession.foodConsumption / this.tickFrequency;
+        this.resources["Food"].quantity -= _(this.population).map((item: PopulationEntry)=> {
+            return item.cardinality * item.profession.FoodConsumption / this.tickFrequency;
         }).sum();
     };
 
@@ -328,25 +333,28 @@ class TribeController {
     }
 
     public addWorker(worker: PopulationEntry): void {
-        this.population['idle'].cardinality--;
-        worker.cardinality++;
+        let diff = (this.population['Idle'].cardinality < this.step) ? this.population['Idle'].cardinality : +this.step;
+        this.population['Idle'].cardinality -= diff;
+        worker.cardinality += diff;
     }
 
     public removeWorker(worker: PopulationEntry): void {
-        this.population['idle'].cardinality++;
-        worker.cardinality--;
+        let diff = worker.cardinality < this.step ? worker.cardinality : +this.step;
+        this.population['Idle'].cardinality += diff;
+        worker.cardinality -= diff;
     }
 
     private starve() {
         let totalFoodConsumption = this.getTotalFoodConsumed();
-        while (totalFoodConsumption > this.resources["food"].quantity) {
-            let numOfIdlers = this.population['idle'].cardinality;
+        while (totalFoodConsumption > this.resources["Food"].quantity) {
+            let numOfIdlers = this.population['Idle'].cardinality;
             let index: number = Math.floor(Math.random() * _.keys(this.population).length);
-            let populationEntry: PopulationEntry = numOfIdlers > 0 ? this.population['idle'] : this.population[_.keys(this.population)[index]];
+            let populationEntry: PopulationEntry = numOfIdlers > 0 ? this.population['Idle'] : this.population[_.keys(this.population)[index]];
             if (populationEntry.cardinality > 0) {
-                totalFoodConsumption -= populationEntry.profession.foodConsumption;
+                totalFoodConsumption -= populationEntry.profession.FoodConsumption;
                 populationEntry.cardinality--;
             }
+            this.updateStep();
         }
     }
 
@@ -358,12 +366,12 @@ class TribeController {
 
     public getTotalFoodConsumed() {
         return _(this.population).map((item: PopulationEntry)=> {
-            return item.cardinality * item.profession.foodConsumption;
+            return item.cardinality * item.profession.FoodConsumption;
         }).sum();
     }
 
     public research(tech: Tech) {
-        this.resources["science"].quantity -= tech.price;
+        this.resources["Science"].quantity -= tech.price;
         delete this.availableTechs[tech.name];
         this.allTechs[tech.name] || delete this.allTechs[tech.name];
         _(tech.unlocks).forEach((newTech: string)=> {
@@ -388,6 +396,25 @@ class TribeController {
         profession.efficiency *= 1.2;
         profession.upgradeCost *= 1.6;
     }
+
+    public updateStep(): void {
+        let toReturn: Array<number> = [];
+        [0.1, 0.2, 0.5, 1].forEach((item)=> {
+            let number = Math.floor(this.getTotalPopulation() * item);
+            if (number > 1) {
+                toReturn.push(number)
+            }
+        });
+        this.availableSteps = toReturn;
+        if (this.availableSteps.length == 0) {
+            this.step = 1;
+        }
+        if (this.step != 1) {
+            this.step = _(this.availableSteps.concat(1)).minBy((item)=> {
+                return Math.abs(this.step - item);
+            })
+        }
+    }
 }
 interface Resources {
     [key: string]: Resource;
@@ -400,7 +427,7 @@ interface Resource {
 
 interface Profession {
     name: string
-    foodConsumption: number
+    FoodConsumption: number
     efficiency: number
     act: Function
     upgradeCost: number

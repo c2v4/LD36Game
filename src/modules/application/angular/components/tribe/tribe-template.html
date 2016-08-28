@@ -1,91 +1,145 @@
-<h1>
-    TRIBE
-</h1>
-<div id="resources">
-    <table class="table table-condensed table-bordered">
-        <tr ng-class="vm.resources['children'].balance()>0?'success':'info'">
-            <td>{{vm.resources['children'].name}}:</td>
-            <td>
-                <div class="progress-bar  progress-bar-striped " role="progressbar"
-                     aria-valuenow="{{vm.resources['children'].quantity}}"
-                     aria-valuemin="0" aria-valuemax="1" style="width:{{vm.resources['children'].quantity*100}}%"
-                     ng-class="vm.resources['children'].balance() > 0 ? 'progress-bar-success active ' : '' ">
-                    {{vm.resources['children'].quantity*100|number:0}}%
-                    ({{vm.resources['children'].balance()|number:2}})
-                </div>
-
-            </td>
-        </tr>
-        <tr ng-repeat="resource in vm.resources" ng-if="resource.name != 'children'"
-            ng-class="resource.balance()>0?'success':resource.balance()==0?'info':'danger'">
-            <td>
-                {{resource.name}}:
-            </td>
-            <td>{{resource.quantity|number:2}} (<span
-                    ng-style="{ color: resource.balance() > 0 ? 'green' :resource.balance()==0?'black': 'red' }">{{resource.balance()|number:2}}</span>)
-            </td>
-        </tr>
-    </table>
-</div>
-<div class="row">
-    <div class="col-md-4" id="population">
-        <h3>Population: {{vm.getTotalPopulation()}}</h3>
-        <table class="table table-condensed table-bordered table-hover">
-            <thead>
-            <tr>
-                <td>Job</td>
-                <td>Quantity</td>
-                <td>Food Consumption (total:{{vm.getTotalFoodConsumed()|number:2}})</td>
-                <td>Efficiency</td>
-            </tr>
-            </thead>
-            <tr ng-repeat="item in vm.population">
-                <td>{{item.profession.name}}</td>
-                <td><span class="label label-pill label-info" style="align:center">{{item.cardinality}}</span></td>
-                <td>{{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
-                <td>{{(item.profession.efficiency * item.cardinality)|number:3}}
-                    <button class="btn btn-primary" ng-click="vm.upgrade(item.profession)"
-                            ng-disabled="!vm.resources['tools']||item.profession.upgradeCost > vm.resources['tools'].quantity">
-                        Upgrade
-                        ({{item.profession.upgradeCost|number:1}} tools)
-                    </button>
-                </td>
-                <td>
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-primary" ng-click="vm.addWorker(item)"
-                                ng-disabled="!(vm.availableWorkers() && item.profession.name!='idle')">+
-                        </button>
-                        <button class="btn btn-primary" ng-click="vm.removeWorker(item)"
-                                ng-disabled="!(item.cardinality>0 && item.profession.name!='idle')">-
-                        </button>
+<md-content>
+    <div layout="column">
+        <div layout="row" flex="20" layout-align="center center">
+            <h1>
+                TRIBE
+            </h1>
+        </div>
+        <div flex="10"></div>
+        <div layout="row" flex="70" layout-align="space-around start">
+            <section class="md-whiteframe-10dp" style="border-radius: 5px" layout="column">
+                <div id="resources" flex>
+                    <div layout="row" layout-align="center center">
+                        <h3>Resources</h3>
                     </div>
-                </td>
-            </tr>
-        </table>
+                    <table class="table table-condensed table-bordered">
+                        <tr ng-class="vm.resources['Children'].balance()>0?'success':'info'">
+                            <td>{{vm.resources['Children'].name}}</td>
+                            <td>
+                                <div class="progress-bar  progress-bar-striped " role="progressbar"
+                                     aria-valuenow="{{vm.resources['Children'].quantity}}"
+                                     aria-valuemin="0" aria-valuemax="1"
+                                     style="width:{{vm.resources['Children'].quantity*100}}%"
+                                     ng-class="vm.resources['Children'].balance() > 0 ? 'progress-bar-success active ' : '' ">
+                                    {{vm.resources['Children'].quantity*100|number:0}}%
+                                    ({{vm.resources['Children'].balance()|number:2}})
+                                </div>
+
+                            </td>
+                        </tr>
+                        <tr ng-repeat="resource in vm.resources" ng-if="resource.name != 'Children'"
+                            ng-class="resource.balance()>0?'success':resource.balance()==0?'info':'danger'">
+                            <td>
+                                {{resource.name}}
+                            </td>
+                            <td>{{resource.quantity|number:2}} (<span
+                                    ng-style="{ color: resource.balance() > 0 ? 'green' :resource.balance()==0?'black': 'red' }">{{resource.balance()|number:2}}</span>)
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <div id="environment" flex>
+                    <div layout="row" layout-align="center center">
+                        <h3>Environment</h3>
+                    </div>
+                    <table class="table table-condensed table-bordered table-hover">
+                        <tr ng-repeat="item in vm.environment">
+                            <td>{{item.name}}</td>
+                            <td>{{item.quantity | number:0}} (<span
+                                    ng-style="{ color: item.balance() > 0 ? 'green' :item.balance()==0?'black': 'red' }">{{item.balance()|number:2}}</span>)
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </section>
+            <section class="md-whiteframe-10dp" style="border-radius: 5px" id="population">
+                <div layout="row" layout-align="center center">
+                    <h3>Population {{vm.getTotalPopulation()}}</h3>
+                </div>
+                <table class="table table-condensed table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <td>Job</td>
+                        <td>Quantity</td>
+                        <td>Food Consumption (total: {{vm.getTotalFoodConsumed()|number:2}})</td>
+                        <td>Efficiency</td>
+                        <td>
+                            <md-radio-group ng-model="vm.step">
+                                <md-radio-button value="1" style="display: inline" class="md-primary" checked>1
+                                </md-radio-button>
+                                <md-radio-button ng-repeat="item in vm.availableSteps" style="display: inline"
+                                                 value="{{item}}" class="md-primary">{{item}}
+                                </md-radio-button>
+                            </md-radio-group>
+                        </td>
+                    </tr>
+                    </thead>
+                    <tr ng-repeat="item in vm.population">
+                        <td>{{item.profession.name}}</td>
+                        <td>{{item.cardinality}}
+                        </td>
+                        <td>{{(item.cardinality * item.profession.foodConsumption)|number:1}}</td>
+                        <td>{{(item.profession.efficiency * item.cardinality)|number:3}}
+                            <md-button class="md-raised md-primary" ng-click="vm.upgrade(item.profession)"
+                                       ng-disabled="!vm.resources['tools']||item.profession.upgradeCost > vm.resources['tools'].quantity">
+                                Upgrade
+                                ({{item.profession.upgradeCost|number:1}} tools)
+                            </md-button>
+                        </td>
+                        <td layout="row" layout-align="space-around center">
+                            <md-button class="md-raised md-primary" aria-label="add" style="display:inline"
+                                       ng-click="vm.addWorker(item)"
+                                       ng-disabled="!(vm.availableWorkers() && item.profession.name!='Idle')">
+                                +
+                            </md-button>
+                            <md-button class="md-raised md-primary" aria-label="add" style="display:inline"
+                                       ng-click="vm.removeWorker(item)"
+                                       ng-disabled="!(item.cardinality>0 && item.profession.name!='Idle')">
+                                -
+                            </md-button>
+                            <!--<div class="btn-group" role="group">-->
+                            <!--<button class="btn btn-primary" >+-->
+                            <!--</button>-->
+                            <!--<button class="btn btn-primary" >- -->
+                            <!--</button>-->
+                            <!--</div>-->
+                        </td>
+                    </tr>
+                </table>
+            </section>
+            <section class="md-whiteframe-10dp" style="border-radius: 5px" id="technology">
+                <div layout="row" layout-align="center center">
+                    <h3>Technology</h3>
+                </div>
+                <table class="table table-condensed table-bordered table-hover">
+                    <thead>
+                    <tr>
+                        <td>Name</td>
+                        <td>Price</td>
+                    </tr>
+                    </thead>
+                    <tr ng-repeat="item in vm.availableTechs">
+                        <td>{{item.name}}</td>
+                        <td>{{item.price}}</td>
+                        <td>
+                            <md-button class="md-raised md-primary" ng-click="vm.research(item)"
+                                       ng-disabled="item.price>vm.resources['science'].quantity">
+                                Research
+                                <md-tooltip md-direction="left">
+                                    <md-list>
+                                        <h5 style="display: block">
+                                            Unlocks:
+                                        </h5>
+                                        <h6 style="display: block" ng-repeat="piece in item.unlocks">
+                                            {{piece}}
+                                        </h6>
+                                    </md-list>
+                                </md-tooltip>
+                            </md-button>
+                        </td>
+                    </tr>
+                </table>
+            </section>
+        </div>
     </div>
-    <div class="col-md-4">
-        <h3>Technology:</h3>
-        <table class="table table-condensed table-bordered table-hover">
-            <tr ng-repeat="item in vm.availableTechs">
-                <td>Name: {{item.name}}</td>
-                <td>Price: {{item.price}}</td>
-                <td>
-                    <button class="btn btn-primary" ng-click="vm.research(item)"
-                            ng-disabled="item.price>vm.resources['science'].quantity">Research
-                    </button>
-                </td>
-            </tr>
-        </table>
-    </div>
-    <div id="environment" class="col-md-4">
-        <h3>Environment:</h3>
-        <table class="table table-condensed table-bordered table-hover">
-            <tr ng-repeat="item in vm.environment">
-                <td>Name: {{item.name}}</td>
-                <td>Quantity: {{item.quantity | number:0}} (<span
-                        ng-style="{ color: item.balance() > 0 ? 'green' :item.balance()==0?'black': 'red' }">{{item.balance()|number:2}}</span>)
-                </td>
-            </tr>
-        </table>
-    </div>
-</div>
+</md-content>
