@@ -35,6 +35,7 @@ class TribeController {
     public philosophyAccess: boolean = false;
     public date: Moment;
     public paused: boolean = false;
+    public sweetDebug: boolean = false;
 
     public availableSteps: Array<number> = [];
 
@@ -87,7 +88,7 @@ class TribeController {
                         balance += fisherEfficiency;
                         this.environment["Fish"].quantity -= fisherEfficiency / this.tickFrequency;
                     } else {
-                        balance += this.environment["Berries"].quantity;
+                        balance += this.environment["Fish"].quantity;
                         this.environment["Fish"].quantity -= this.environment["Fish"].quantity / this.tickFrequency;
                     }
                 }
@@ -777,6 +778,12 @@ class TribeController {
             this.population["Idle"].cardinality += toAdd;
             this.updateStep();
         }
+    }
+
+    public gibbeMonies(): void {
+        this.population["Idle"].cardinality = 100;
+        this.resources["Science"].quantity = 3000;
+        this.resources["Food"].quantity = 30000000;
     }
 }
 interface Resources {
